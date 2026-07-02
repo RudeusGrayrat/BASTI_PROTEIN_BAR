@@ -1,0 +1,35 @@
+# Node
+node_modules/
+
+# Cualquier node_modules dentro de subcarpetas
+**/node_modules/
+
+# Logs
+*.log
+
+# Variables de entorno
+.env
+.env.*
+
+# Compilados
+dist/
+**/dist/
+
+.next/
+**/.next/
+
+coverage/
+
+# Prisma
+prisma/dev.db
+
+# VS Code
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Flutter
+**/.dart_tool/
+**/build/
