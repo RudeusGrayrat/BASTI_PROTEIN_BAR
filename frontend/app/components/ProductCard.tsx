@@ -1,13 +1,13 @@
 import { ProductArt } from "./ProductArt";
 
 type ProductCardProps = {
-  product: {
+  product: Readonly<{
     name: string;
     description: string;
     protein: string;
     price: string;
     image: "waffle" | "matcha" | "bowl" | "shake";
-  };
+  }>;
 };
 
 export function ProductCard({ product }: ProductCardProps) {
