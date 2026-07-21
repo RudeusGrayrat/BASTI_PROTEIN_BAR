@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Providers } from "./providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Basti Protein Bar",
-  description: "Waffles proteicos, bebidas saludables y programa de puntos.",
+  title: "BASTI Consumer Web",
+  description: "Waffles proteicos, bebidas saludables y beneficios para clientes BASTI.",
 };
 
 export default function RootLayout({
@@ -27,7 +28,9 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full bg-[#fbf7ed] text-[#1d2815]">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

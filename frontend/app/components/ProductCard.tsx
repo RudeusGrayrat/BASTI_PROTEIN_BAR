@@ -19,10 +19,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="font-semibold text-[#1d2815]">{product.name}</h3>
           <button
             type="button"
-            aria-label="Agregar a favoritos"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#dacfbf] text-[#3a472a]"
+            aria-label="Favoritos proximamente"
+            disabled
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-[#dacfbf] text-[#3a472a] opacity-70"
           >
-            <span aria-hidden>♡</span>
+            <span aria-hidden>*</span>
           </button>
         </div>
         <p className="text-sm text-[#6e6a5d]">{product.protein} proteina</p>
