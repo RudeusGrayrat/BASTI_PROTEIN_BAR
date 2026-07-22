@@ -124,7 +124,7 @@ export function BastiLanding() {
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,240,227,0.96)_0%,rgba(246,240,227,0.82)_25%,rgba(246,240,227,0.24)_40%,rgba(246,240,227,0.06)_70%)]" />
 
         <div className="relative z-10 mx-auto grid max-w-[1380px] gap-10 px-5 pb-10 pt-10 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:gap-0 lg:pt-12">
-          <div className="relative z-10 max-w-[590px] py-6 lg:py-10">
+          <div className="relative z-10 max-w-[590px] pb-6 lg:pb-8">
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/78 px-4 py-2 text-sm font-bold text-[#393e2d] shadow-sm backdrop-blur">
               <LeafIcon className="h-4 w-4" />
               100% saludable
