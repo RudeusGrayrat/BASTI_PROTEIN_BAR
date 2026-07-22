@@ -209,10 +209,10 @@ export default function ProfilePage() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push("/")}
                 className="rounded-full border border-[#d8ccb6] px-6 py-3 font-semibold text-[#364026] transition hover:bg-white"
               >
-                Volver al dashboard
+                Volver al inicio
               </button>
             </div>
           </form>

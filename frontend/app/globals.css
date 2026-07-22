@@ -3,6 +3,9 @@
 :root {
   --background: #fbf7ed;
   --foreground: #1d2815;
+  --surface: #fffaf1;
+  --olive: #556235;
+  --olive-dark: #45502b;
 }
 
 @theme inline {
@@ -22,6 +25,14 @@ body {
     linear-gradient(180deg, #fbf7ed 0%, #f6efe1 100%);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(85, 98, 53, 0.18);
 }
 
 button,

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { Header } from "../components/Header";
-import { ProductArt } from "../components/ProductArt";
+import { ProductImage } from "../components/ProductImage";
 import { navigateAfterAuth, useAuth } from "../context/auth-context";
 import { isApiError } from "../lib/api";
 
@@ -16,7 +16,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      navigateAfterAuth(() => router.replace("/dashboard"));
+      navigateAfterAuth(() => router.replace("/"));
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -53,7 +53,7 @@ export default function RegisterPage() {
         lastName: lastName || undefined,
       });
 
-      navigateAfterAuth(() => router.replace("/dashboard"));
+      navigateAfterAuth(() => router.replace("/"));
     } catch (error) {
       if (isApiError(error)) {
         setErrorMessage(
@@ -80,7 +80,7 @@ export default function RegisterPage() {
       <Header />
       <section className="mx-auto grid min-h-[calc(100vh-80px)] max-w-6xl gap-8 px-5 py-10 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
         <div className="overflow-hidden rounded-[28px] border border-[#e0d4c1] bg-[#efe3d0] shadow-2xl shadow-[#61451f]/10 max-lg:order-2">
-          <ProductArt variant="waffle" large />
+          <ProductImage variant="waffle" alt="Waffle proteico clasico" large />
         </div>
 
         <div className="rounded-3xl border border-[#e1d7c7] bg-white/70 p-6 shadow-xl shadow-[#61451f]/10 sm:p-10">

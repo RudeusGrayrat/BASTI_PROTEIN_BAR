@@ -1,4 +1,4 @@
-import { ProductArt } from "./ProductArt";
+import { ProductImage, type ProductImageVariant } from "./ProductImage";
 
 type ProductCardProps = {
   product: Readonly<{
@@ -6,14 +6,14 @@ type ProductCardProps = {
     description: string;
     protein: string;
     price: string;
-    image: "waffle" | "matcha" | "bowl" | "shake";
+    image: ProductImageVariant;
   }>;
 };
 
 export function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="overflow-hidden rounded-2xl border border-[#e1d7c7] bg-[#fffaf0] shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
-      <ProductArt variant={product.image} />
+      <ProductImage variant={product.image} alt={product.name} />
       <div className="p-4">
         <div className="mb-2 flex items-start justify-between gap-3">
           <h3 className="font-semibold text-[#1d2815]">{product.name}</h3>

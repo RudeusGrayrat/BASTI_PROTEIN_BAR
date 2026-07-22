@@ -49,7 +49,7 @@ export function Header() {
           <Link href="/">Inicio</Link>
           <Link href="/#menu">Menu</Link>
           <Link href="/#beneficios">Beneficios</Link>
-          <Link href={isAuthenticated ? "/dashboard" : "/register"}>
+          <Link href={isAuthenticated ? "/" : "/register"}>
             {isAuthenticated ? "Mi cuenta" : "Unirme"}
           </Link>
         </nav>
@@ -62,9 +62,9 @@ export function Header() {
           ) : isAuthenticated ? (
             <>
               <Link
-                href="/profile"
+                href="/"
                 className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  pathname === "/profile"
+                  pathname === "/"
                     ? "border-[#385126] bg-[#385126] text-white"
                     : "border-[#d8ccb6] text-[#364026] hover:bg-white"
                 }`}

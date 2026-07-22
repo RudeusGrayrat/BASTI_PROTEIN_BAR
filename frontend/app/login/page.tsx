@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { Header } from "../components/Header";
-import { ProductArt } from "../components/ProductArt";
+import { ProductImage } from "../components/ProductImage";
 import { navigateAfterAuth, useAuth } from "../context/auth-context";
 import { isApiError } from "../lib/api";
 
@@ -16,7 +16,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      navigateAfterAuth(() => router.replace("/dashboard"));
+      navigateAfterAuth(() => router.replace("/"));
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -35,7 +35,7 @@ export default function LoginPage() {
         password,
       });
 
-      navigateAfterAuth(() => router.replace("/dashboard"));
+      navigateAfterAuth(() => router.replace("/"));
     } catch (error) {
       if (isApiError(error)) {
         const firstMessage = error.messages[0] ?? "No se pudo iniciar sesion.";
@@ -115,7 +115,7 @@ export default function LoginPage() {
               disabled={isSubmitting}
               className="h-12 w-full rounded-full bg-[#385126] font-bold text-white shadow-lg shadow-[#385126]/20 transition hover:bg-[#26391a] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isSubmitting ? "Ingresando..." : "Ingresar al dashboard"}
+              {isSubmitting ? "Ingresando..." : "Entrar a mi cuenta"}
             </button>
 
             <button
@@ -139,7 +139,7 @@ export default function LoginPage() {
         </div>
 
         <div className="overflow-hidden rounded-[28px] border border-[#e0d4c1] bg-[#efe3d0] shadow-2xl shadow-[#61451f]/10">
-          <ProductArt variant="matcha" large />
+          <ProductImage variant="matcha" alt="Matcha latte proteico" large />
         </div>
       </section>
     </main>
