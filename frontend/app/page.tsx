@@ -1,11 +1,11 @@
- "use client";
+"use client";
 
 import { BastiDashboard } from "./components/BastiDashboard";
 import { BastiLanding } from "./components/BastiLanding";
 import { useAuth } from "./context/auth-context";
 
 export default function HomePage() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isLoading} = useAuth();
 
   if (isLoading) {
     return (
@@ -13,10 +13,6 @@ export default function HomePage() {
         Restaurando tu experiencia...
       </main>
     );
-  }
-
-  if (isAuthenticated && user) {
-    return <BastiDashboard />;
   }
 
   return <BastiLanding />;

@@ -45,13 +45,13 @@ export function BastiDashboard() {
       level === "Black"
         ? 100
         : Math.min(
+          100,
+          Math.round(
+            ((points - (level === "Gold" ? 2800 : level === "Silver" ? 1800 : 1000)) /
+              (nextThreshold - (level === "Gold" ? 2800 : level === "Silver" ? 1800 : 1000))) *
             100,
-            Math.round(
-              ((points - (level === "Gold" ? 2800 : level === "Silver" ? 1800 : 1000)) /
-                (nextThreshold - (level === "Gold" ? 2800 : level === "Silver" ? 1800 : 1000))) *
-                100,
-            ),
-          );
+          ),
+        );
     const streakDays = 5 + (seed % 5);
 
     return {
@@ -80,12 +80,9 @@ export function BastiDashboard() {
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#f6f1e5_0%,#f3ede0_100%)] text-[#1c1b15]">
       <div className="mx-auto grid min-h-screen max-w-[1520px] lg:grid-cols-[290px_1fr]">
-        <aside className="border-r border-[#e5dbca] bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(245,238,227,0.92))] px-6 py-8">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[#171710] text-[#f8efdc] shadow-lg shadow-[#171710]/15">
-              <span className="text-2xl font-black">B</span>
-            </div>
-            <div>
+        <aside className="border-r border-[#e5dbca9f] bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(245,238,227,0.92))] shadow-lg px-6 py-8">
+          <Link href="/" className="flex items-center justify-center w-full gap-3">
+            <div className="px-4 text-center">
               <p className="font-serif text-4xl leading-none tracking-[0.18em] text-[#171710]">
                 BASTI
               </p>
@@ -100,11 +97,10 @@ export function BastiDashboard() {
               <Link
                 key={item}
                 href={item === "Perfil" ? "/profile" : "/"}
-                className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium transition ${
-                  index === 0
-                    ? "bg-[#eeecde] text-[#2b2c22]"
-                    : "text-[#44453d] hover:bg-white/70"
-                }`}
+                className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-medium transition ${index === 0
+                  ? "bg-[#eeecde] text-[#2b2c22]"
+                  : "text-[#44453d] hover:bg-white/70"
+                  }`}
               >
                 {index === 0 ? (
                   <MenuGridIcon className="h-5 w-5" />
@@ -148,12 +144,9 @@ export function BastiDashboard() {
         <section className="px-5 py-6 sm:px-8 lg:px-10">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#738055]">
-                Consumer App
+              <p className="text-xl font-semibold uppercase tracking-[0.15em] text-[#738055]">
+                Basti App
               </p>
-              <h1 className="mt-2 text-5xl font-semibold">
-                Dashboard
-              </h1>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -176,7 +169,7 @@ export function BastiDashboard() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-5 xl:grid-cols-[1.4fr_0.8fr]">
+          <div className="mt-5 grid gap-5 xl:grid-cols-[1.4fr_0.8fr]">
             <div className={`rounded-[2rem] bg-gradient-to-br ${profileCardTone} p-6 text-white shadow-[0_28px_60px_rgba(76,92,45,0.24)]`}>
               <div className="grid gap-6 lg:grid-cols-[1fr_240px] lg:items-center">
                 <div>
@@ -256,13 +249,12 @@ export function BastiDashboard() {
                     </div>
                     <div className="mt-3 h-3 overflow-hidden rounded-full bg-[#ece5d7]">
                       <div
-                        className={`h-full rounded-full ${
-                          item.tone === "amber"
-                            ? "bg-[#d79043]"
-                            : item.tone === "sage"
-                              ? "bg-[#7d855b]"
-                              : "bg-[#6e7f47]"
-                        }`}
+                        className={`h-full rounded-full ${item.tone === "amber"
+                          ? "bg-[#d79043]"
+                          : item.tone === "sage"
+                            ? "bg-[#7d855b]"
+                            : "bg-[#6e7f47]"
+                          }`}
                         style={{ width: `${item.progress}%` }}
                       />
                     </div>
@@ -294,11 +286,10 @@ export function BastiDashboard() {
                     {Array.from({ length: 7 }).map((_, index) => (
                       <div
                         key={index}
-                        className={`grid h-8 w-8 place-items-center rounded-full text-sm ${
-                          index < Math.min(dashboardStats.streakDays, 7)
-                            ? "bg-[#dfe6be] text-[#566237]"
-                            : "bg-[#f1ecdf] text-[#b0a89b]"
-                        }`}
+                        className={`grid h-8 w-8 place-items-center rounded-full text-sm ${index < Math.min(dashboardStats.streakDays, 7)
+                          ? "bg-[#dfe6be] text-[#566237]"
+                          : "bg-[#f1ecdf] text-[#b0a89b]"
+                          }`}
                       >
                         ok
                       </div>

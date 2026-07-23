@@ -39,9 +39,6 @@ export function BastiLanding() {
       <header className="sticky top-0 z-30 border-b border-[#dfd4c3] bg-[#f8f4ec]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1380px] items-center justify-between gap-6 px-5 py-5 sm:px-8">
           <Link href="/" className="flex items-center gap-3">
-            <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[#171710] text-[#f8efdc] shadow-lg shadow-[#171710]/15">
-              <span className="text-2xl font-black">B</span>
-            </div>
             <div>
               <p className="font-serif text-4xl leading-none tracking-[0.14em] text-[#171710]">
                 BASTI
@@ -112,27 +109,33 @@ export function BastiLanding() {
         </div>
       </header>
 
-      <section className="relative min-h-[720px] overflow-hidden">
-        <Image
-          src={"/images/basti/hero-waffles.png"}
-          alt="Waffles proteicos BASTI con platano y cacao"
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,240,227,0.96)_0%,rgba(246,240,227,0.82)_25%,rgba(246,240,227,0.24)_40%,rgba(246,240,227,0.06)_70%)]" />
+      <section className="relative min-h-[680px] max-h-[80vh] overflow-hidden">
+        <div className="absolute inset-y-0 right-0 w-[60vw] max-w-[1500px] lg:w-[90vw]">
+          <Image
+            src={"/images/basti/hero-waffles.png"}
+            alt="Waffles proteícos BASTI con platano y cacao"
+            fill
+            priority
+            sizes="(max-width: 1124px) 100vw, 90vw"
+            className="object-cover object-right"
+          />
+        </div>
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,240,227,0.96)_0%,rgba(249,240,229,1)_30%,rgba(246,240,227,0.34)_45%,rgba(246,240,227,0.06)_60%)]" />
 
-        <div className="relative z-10 mx-auto grid max-w-[1380px] gap-10 px-5 pb-10 pt-10 sm:px-8 lg:grid-cols-[0.78fr_1.22fr] lg:items-center lg:gap-0 lg:pt-12">
-          <div className="relative z-10 max-w-[590px] pb-6 lg:pb-8">
+        <div className="relative z-10  mx-auto max-h-[680px] grid max-w-[1380px] gap-10 px-5  sm:px-8 lg:grid-cols-[0.84fr_1.16fr] lg:items-center lg:gap-0">
+          <div className="relative py-6 z-10 min-h-[560px] lg:min-h-[680px] lg:py-8">
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/78 px-4 py-2 text-sm font-bold text-[#393e2d] shadow-sm backdrop-blur">
               <LeafIcon className="h-4 w-4" />
               100% saludable
             </div>
-            <h1 className="font-serif text-6xl leading-none text-[#171710] sm:text-7xl lg:text-8xl">
+            <h1
+              style={{
+                fontFamily: "BJCree"
+              }}
+              className="font-semibold text-4xl leading-none text-[#171710] sm:text-5xl lg:text-7xl">
               Waffles proteicos
-              <span className="block text-[#556235]">sin azucar</span>
-              anadida
+              <span className="block text-[#B68A5B]">sin azúcar</span>
+              añadida
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-[#4d4b41] sm:text-xl">
               Deliciosos, nutritivos y hechos con ingredientes naturales para
@@ -181,36 +184,35 @@ export function BastiLanding() {
             </div>
           </div>
 
-          <div className="relative min-h-[560px] lg:min-h-[680px]">
-            <div className="absolute -right-[10%] -top-[10%] z-10 grid h-36 w-36 place-items-center rounded-full bg-[#f6ebd3]/95 text-center shadow-lg shadow-[#a88f64]/15">
-              <div>
-                <p className="font-serif text-6xl leading-none text-[#171710]">25g</p>
-                <p className="mt-2 text-lg font-black uppercase tracking-[0.12em] text-[#232016]">
-                  Proteina
-                </p>
-                <p className="mt-1 text-sm text-[#4e493b]">por porcion</p>
-              </div>
+          <div className="relative  min-h-[560px] lg:min-h-[680px]">
+            <div className="absolute -right-30 top-[5%] z-10 grid h-36 w-36 place-items-center rounded-full bg-[#f6ebd3]/95 text-center shadow-lg shadow-[#a88f64]/15 p-5">
+              <p className="font-serif text-5xl leading-none text-[#363C20]">25<span className="text-[#B68A5B]">
+                g
+              </span>
+              </p>
+              <p className="mt-2 text-md font-black uppercase tracking-[0.10em] text-[#232016]">
+                Proteína
+              </p>
+              <p className=" text-sm text-[#4e493b]">por porción</p>
             </div>
 
-            <div className="absolute -bottom-[4%] -right-[30%] z-20 max-w-[280px] rounded-[1.65rem] border border-[#75654f]/35 bg-[#2b281f]/82 p-5 text-[#f5efdf] shadow-2xl shadow-[#15120c]/25 backdrop-blur-md">
-              <div className="flex gap-4">
-                <div className="grid h-14 w-14 place-items-center rounded-full border border-[#7c8256]/55 bg-[#1f1d16] text-[#d6e39e]">
-                  <LeafIcon className="h-7 w-7" />
-                </div>
-                <div>
-                  <p className="text-xl font-semibold">Ingredientes reales</p>
-                  <p className="mt-1 text-sm leading-6 text-[#f3ecdd]/82">
-                    Sin conservantes ni colorantes artificiales.
-                  </p>
-                </div>
+            <div className="absolute bottom-[15%] flex gap-4 -right-40 z-20 max-w-[400px] rounded-[1.65rem] border border-[#75654f]/35 bg-[#2b281f]/82 p-5 text-[#f5efdf] shadow-2xl shadow-[#15120c]/25 backdrop-blur-md">
+              <div className="grid h-16! w-16! place-items-center rounded-full! border border-[#7c8256]/55 bg-[#1f1d16] text-[#d6e39e]">
+                <LeafIcon className="h-9 w-9 " />
+              </div>
+              <div>
+                <p className="text-xl font-semibold">Ingredientes reales</p>
+                <p className="mt-1 text-sm leading-6 text-[#f3ecdd]/82">
+                  Sin conservantes ni colorantes artificiales.
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto -mt-4 max-w-[1380px] px-5 pb-4 sm:px-8 lg:-mt-10">
-        <div className="grid gap-px overflow-hidden rounded-[1.85rem] bg-[#3f412f] p-px shadow-2xl shadow-[#1e1c16]/18 lg:grid-cols-4">
+      <section className="relative z-10 mx-auto  -mt-8 max-w-[1380px] px-5 pb-4 sm:px-8 lg:-mt-15">
+        <div className="grid gap-px overflow-hidden rounded-2xl bg-[#3f412f] p-px shadow-2xl shadow-[#1e1c16]/18 lg:grid-cols-4">
           {featurePillars.map((pillar) => {
             const Icon = pillarIcons[pillar.icon];
 
@@ -236,90 +238,85 @@ export function BastiLanding() {
 
       <section
         id="menu"
-        className="mx-auto grid max-w-[1380px] gap-8 px-5 py-10 sm:px-8 xl:grid-cols-[0.64fr_1.36fr]"
+        className="mx-auto grid max-w-[1380px] gap-12 px-5  mt-5 sm:px-8 "
       >
-        <div className="flex flex-col justify-between rounded-[2rem] bg-[linear-gradient(180deg,#f8f1e5_0%,#f4ebdd_100%)] p-8 shadow-[0_18px_40px_rgba(90,72,39,0.08)]">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.28em] text-[#5f6942]">
-              Nuestro menu
-            </p>
-            <h2 className="mt-4 font-serif text-5xl leading-tight text-[#1b1a13]">
-              Productos favoritos
-            </h2>
-            <div className="mt-5 h-1 w-16 rounded-full bg-[#5f6942]" />
-            <p className="mt-8 max-w-sm text-lg leading-8 text-[#4c4b43]">
-              Elige tus sabores favoritos y disfruta de una opcion saludable en
-              cualquier momento del dia.
+        <div className="flex flex-col justify-between 
+          ">
+          <div className=" w-full mb-4 flex justify-between items-center gap-5 flex-wrap lg:flex-nowrap">
+            <div >
+              <h2 className=" font-serif text-4xl my-2 leading-tight text-[#1b1a13]">
+                Productos favoritos
+              </h2>
+              <div className="mb-2 h-1 w-16 rounded-full bg-[#5f6942]" />
+            </div>
+            <Link
+              href={isAuthenticated ? "/" : "/register"}
+              className="mb-2 inline-flex w-fit items-center gap-2 rounded-full bg-[#556235] px-6 py-4 text-sm font-bold text-white shadow-lg shadow-[#556235]/20 transition hover:bg-[#45502b]"
+            >
+              Ver todo el menu
+              <ArrowRightIcon className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid gap-5 lg:grid-cols-[repeat(3,minmax(0,1fr))_0.95fr]">
+            {products.map((product) => (
+              <article
+                key={product.name}
+                className="overflow-hidden rounded-2xl border border-[#e2d6c4] bg-white/70 shadow-[0_18px_40px_rgba(90,72,39,0.07)]"
+              >
+                <div className="relative">
+                  <div className="overflow-hidden bg-[#f2e8d8]">
+                    <ProductImage variant={product.image} alt={product.name} />
+                  </div>
+                  <span className="absolute left-4 top-4 rounded-full bg-[#f7edd6]/95 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#534328] shadow-sm">
+                    {product.protein}
+                  </span>
+                </div>
+                <div className="p-5">
+                  <h3 className="text-[1.6rem] font-semibold leading-tight text-[#191911]">
+                    {product.name.replace("Proteico", "").replace("Protein", "").trim()}
+                  </h3>
+                  <p className="mt-3 text-[15px] leading-7 text-[#59584f]">
+                    {product.description}
+                  </p>
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-[#6a624d]">
+                      Favorito BASTI
+                    </span>
+                    <HeartIcon className="h-5 w-5 text-[#8c8574]" />
+                  </div>
+                </div>
+              </article>
+            ))}
+
+          </div>
+        </div>
+        <aside className="overflow-hidden rounded-3xl bg-[linear-gradient(180deg,rgba(30,30,24,0.94),rgba(38,39,28,0.92))] p-10 text-[#f7f0df] shadow-[0_24px_50px_rgba(23,21,16,0.18)]">
+          <div className="mb-8">
+            <p className="font-serif text-5xl leading-tight">
+              Mas que un lugar,
+              <span className=" text-[#d6ddaa]"> una experiencia.</span>
             </p>
           </div>
-
-          <Link
-            href={isAuthenticated ? "/" : "/register"}
-            className="mt-10 inline-flex w-fit items-center gap-2 rounded-full bg-[#556235] px-6 py-4 text-sm font-bold text-white shadow-lg shadow-[#556235]/20 transition hover:bg-[#45502b]"
-          >
-            Ver todo el menu
-            <ArrowRightIcon className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="grid gap-5 lg:grid-cols-[repeat(4,minmax(0,1fr))_0.95fr]">
-          {products.map((product) => (
-            <article
-              key={product.name}
-              className="overflow-hidden rounded-[1.8rem] border border-[#e2d6c4] bg-white/70 shadow-[0_18px_40px_rgba(90,72,39,0.07)]"
-            >
-              <div className="relative">
-                <div className="overflow-hidden bg-[#f2e8d8]">
-                  <ProductImage variant={product.image} alt={product.name} />
-                </div>
-                <span className="absolute left-4 top-4 rounded-full bg-[#f7edd6]/95 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#534328] shadow-sm">
-                  {product.protein}
-                </span>
-              </div>
-              <div className="p-5">
-                <h3 className="text-[1.6rem] font-semibold leading-tight text-[#191911]">
-                  {product.name.replace("Proteico", "").replace("Protein", "").trim()}
-                </h3>
-                <p className="mt-3 text-[15px] leading-7 text-[#59584f]">
-                  {product.description}
+          <div className="space-x-8 flex">
+            {experienceHighlights.map((highlight) => (
+              <div
+                key={highlight.title}
+                className="border-r border-white/10 pr-6 last:border-r-0 last:pr-0"
+              >
+                <p className="text-lg font-semibold">{highlight.title}</p>
+                <p className="mt-2 text-sm leading-6 text-[#f5efdf]/70">
+                  {highlight.description}
                 </p>
-                <div className="mt-6 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-[#6a624d]">
-                    Favorito BASTI
-                  </span>
-                  <HeartIcon className="h-5 w-5 text-[#8c8574]" />
-                </div>
               </div>
-            </article>
-          ))}
+            ))}
+          </div>
+        </aside>
 
-          <aside className="overflow-hidden rounded-[1.8rem] bg-[linear-gradient(180deg,rgba(30,30,24,0.94),rgba(38,39,28,0.92))] p-7 text-[#f7f0df] shadow-[0_24px_50px_rgba(23,21,16,0.18)]">
-            <div className="mb-12">
-              <p className="font-serif text-5xl leading-tight">
-                Mas que un lugar,
-                <span className="block text-[#d6ddaa]">una experiencia.</span>
-              </p>
-            </div>
-            <div className="space-y-8">
-              {experienceHighlights.map((highlight) => (
-                <div
-                  key={highlight.title}
-                  className="border-b border-white/10 pb-6 last:border-b-0 last:pb-0"
-                >
-                  <p className="text-lg font-semibold">{highlight.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-[#f5efdf]/70">
-                    {highlight.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </aside>
-        </div>
       </section>
 
-      <section id="beneficios" className="mx-auto max-w-[1380px] px-5 pb-16 sm:px-8">
-        <div className="grid gap-8 rounded-[2.15rem] border border-[#eadfce] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(247,239,223,0.88))] p-8 shadow-[0_28px_60px_rgba(90,72,39,0.08)] lg:grid-cols-[0.75fr_1.25fr_auto] lg:items-center">
-          <div className="flex items-center gap-5">
+      <section id="beneficios" className=" mx-auto max-w-[1380px] px-5 p-16 sm:px-8">
+        <div className=" gap-8 flex flex-col rounded-3xl border border-[#eadfce] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(247,239,223,0.88))] p-8 shadow-[0_28px_60px_rgba(90,72,39,0.08)] lg:grid-cols-[0.75fr_1.25fr_auto] lg:items-center">
+          <div className="flex items-center gap-5 ">
             <div className="grid h-28 w-28 shrink-0 place-items-center rounded-[2rem] bg-[#f3e8d2] shadow-inner">
               <div className="text-center">
                 <p className="font-serif text-3xl tracking-[0.22em]">BASTI</p>

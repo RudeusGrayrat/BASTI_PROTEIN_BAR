@@ -23,8 +23,8 @@ function createIcon(path: React.ReactNode) {
 
 export const LeafIcon = createIcon(
   <>
-    <path d="M5 13c0-5 4-8 11-8 0 7-3 11-8 11-2 0-3-1-3-3Z" />
-    <path d="M7 17c3-3 6-6 11-8" />
+    <path d="M7 13c0-5 4-8 11-8 0 7-3 11-8 11-2 0-3-1-3-3Z" />
+    <path d="M4 17c3-3 6-6 11-8" />
   </>,
 );
 
