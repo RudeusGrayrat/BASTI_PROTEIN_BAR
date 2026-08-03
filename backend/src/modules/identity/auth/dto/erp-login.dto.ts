@@ -9,7 +9,7 @@ export class ErpLoginDto {
   identifier: string;
 
   @IsString()
-  @MinLength(8)
+  @MinLength(5)
   @MaxLength(100)
   password: string;
 }

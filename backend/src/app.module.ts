@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/c
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthorizationModule } from './common/authorization/authorization.module';
 import { HttpLoggingMiddleware } from './common/middleware/http-logging.middleware';
 import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
@@ -14,6 +15,7 @@ import { IdentityModule } from './modules/identity/identity.module';
       load: [configuration],
       validate: validateEnv,
     }),
+    AuthorizationModule,
     IdentityModule,
   ],
   controllers: [AppController],

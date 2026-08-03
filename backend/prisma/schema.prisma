@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider     = "prisma-client"
   output       = "../src/database/prisma/generated"
@@ -30,24 +25,89 @@ enum OAuthProvider {
   GOOGLE
 }
 
+enum OrganizationDocumentType {
+  RUC
+  OTHER
+}
+
+enum OrganizationStatus {
+  ACTIVE
+  TRIAL
+  SUSPENDED
+  DISABLED
+  ARCHIVED
+}
+
+enum BranchStatus {
+  ACTIVE
+  INACTIVE
+  CLOSED
+}
+
+enum MembershipStatus {
+  INVITED
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+  TERMINATED
+}
+
+enum CustomerProfileStatus {
+  ACTIVE
+  BLOCKED
+  ARCHIVED
+}
+
+enum RoleContext {
+  PLATFORM
+  ORGANIZATION
+}
+
+enum PermissionScope {
+  OWN
+  BRANCH
+  ORGANIZATION
+  PLATFORM
+}
+
+enum PlatformAccessStatus {
+  ACTIVE
+  SUSPENDED
+  DISABLED
+}
+
+enum ModuleAudience {
+  PLATFORM
+  ORGANIZATION
+  BOTH
+}
+
+enum PermissionOverrideEffect {
+  ALLOW
+  DENY
+}
+
 model User {
-  id                 String         @id @default(uuid()) @db.Uuid
-  email              String?        @unique
+  id                 String           @id @default(uuid()) @db.Uuid
+  email              String?          @unique
   passwordHash       String?
   documentType       DocumentType?
-  documentNumber     String?        @unique
+  documentNumber     String?          @unique
   firstName          String?
   lastName           String?
   phone              String?
   avatarUrl          String?
   emailVerifiedAt    DateTime?
   documentVerifiedAt DateTime?
-  status             UserStatus     @default(ACTIVE)
+  status             UserStatus       @default(ACTIVE)
   lastLoginAt        DateTime?
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
   sessions           Session[]
   oauthAccounts      OAuthAccount[]
+  memberships        Membership[]
+  customerProfiles   CustomerProfile[]
+  platformAccess     PlatformAccess?
 }
 
 model Session {
@@ -74,4 +134,252 @@ model OAuthAccount {
 
   @@unique([provider, providerAccountId])
   @@index([userId])
+}
+
+model Organization {
+  id               String                   @id @default(uuid()) @db.Uuid
+  slug             String                   @unique
+  legalName        String
+  tradeName        String?
+  documentType     OrganizationDocumentType?
+  documentNumber   String?
+  email            String?
+  phone            String?
+  websiteUrl       String?
+  status           OrganizationStatus       @default(ACTIVE)
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  memberships      Membership[]
+  branches         Branch[]
+  roles            Role[]
+  customerProfiles CustomerProfile[]
+  modules          OrganizationModule[]
+
+  @@index([status])
+  @@index([documentNumber])
+}
+
+model Branch {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  code           String?
+  name           String
+  address        String?
+  phone          String?
+  status         BranchStatus @default(ACTIVE)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  memberships    MembershipBranch[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, status])
+}
+
+model Membership {
+  id              String             @id @default(uuid()) @db.Uuid
+  userId          String             @db.Uuid
+  organizationId  String             @db.Uuid
+  employeeCode    String?
+  title           String?
+  status          MembershipStatus   @default(ACTIVE)
+  startsAt        DateTime?
+  endsAt          DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization    Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  branchAccess    MembershipBranch[]
+  roleAssignments MembershipRole[]
+  permissionOverrides MembershipPermissionOverride[]
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, status])
+  @@index([userId, status])
+}
+
+model PlatformAccess {
+  id              String               @id @default(uuid()) @db.Uuid
+  userId          String               @unique @db.Uuid
+  status          PlatformAccessStatus @default(ACTIVE)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleAssignments PlatformAccessRole[]
+  permissionOverrides PlatformAccessPermissionOverride[]
+
+  @@index([status])
+}
+
+model Role {
+  id                  String               @id @default(uuid()) @db.Uuid
+  context             RoleContext
+  scopeKey            String               @unique
+  organizationId      String?              @db.Uuid
+  key                 String
+  name                String
+  description         String?
+  isSystem            Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  organization        Organization?        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  permissions         RolePermission[]
+  membershipRoles     MembershipRole[]
+  platformAccessRoles PlatformAccessRole[]
+
+  @@unique([context, organizationId, key])
+  @@index([context, organizationId])
+}
+
+model Permission {
+  id            String            @id @default(uuid()) @db.Uuid
+  key           String            @unique
+  name          String
+  description   String?
+  moduleKey     String?
+  submoduleKey  String?
+  scope         PermissionScope   @default(ORGANIZATION)
+  audience      ModuleAudience    @default(ORGANIZATION)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  roles         RolePermission[]
+  membershipOverrides MembershipPermissionOverride[]
+  platformOverrides   PlatformAccessPermissionOverride[]
+
+  @@index([moduleKey, submoduleKey])
+  @@index([audience, scope])
+}
+
+model MembershipRole {
+  id            String     @id @default(uuid()) @db.Uuid
+  membershipId  String     @db.Uuid
+  roleId        String     @db.Uuid
+  membership    Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  role          Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([membershipId, roleId])
+  @@index([roleId])
+}
+
+model PlatformAccessRole {
+  id               String         @id @default(uuid()) @db.Uuid
+  platformAccessId String         @db.Uuid
+  roleId           String         @db.Uuid
+  platformAccess   PlatformAccess @relation(fields: [platformAccessId], references: [id], onDelete: Cascade)
+  role             Role           @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([platformAccessId, roleId])
+  @@index([roleId])
+}
+
+model RolePermission {
+  id            String      @id @default(uuid()) @db.Uuid
+  roleId        String      @db.Uuid
+  permissionId  String      @db.Uuid
+  role          Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission    Permission  @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model MembershipPermissionOverride {
+  id            String                   @id @default(uuid()) @db.Uuid
+  membershipId  String                   @db.Uuid
+  permissionId  String                   @db.Uuid
+  effect        PermissionOverrideEffect
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  membership    Membership               @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  permission    Permission               @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([membershipId, permissionId])
+  @@index([permissionId])
+  @@index([membershipId, effect])
+}
+
+model PlatformAccessPermissionOverride {
+  id                String                   @id @default(uuid()) @db.Uuid
+  platformAccessId  String                   @db.Uuid
+  permissionId      String                   @db.Uuid
+  effect            PermissionOverrideEffect
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  platformAccess    PlatformAccess           @relation(fields: [platformAccessId], references: [id], onDelete: Cascade)
+  permission        Permission               @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([platformAccessId, permissionId])
+  @@index([permissionId])
+  @@index([platformAccessId, effect])
+}
+
+model MembershipBranch {
+  id            String      @id @default(uuid()) @db.Uuid
+  membershipId  String      @db.Uuid
+  branchId      String      @db.Uuid
+  membership    Membership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  branch        Branch      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([membershipId, branchId])
+  @@index([branchId])
+}
+
+model CustomerProfile {
+  id                   String                @id @default(uuid()) @db.Uuid
+  userId               String                @db.Uuid
+  organizationId       String                @db.Uuid
+  externalCustomerCode String?
+  loyaltyTier          String?
+  status               CustomerProfileStatus @default(ACTIVE)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization         Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, status])
+}
+
+model PlatformModule {
+  id            String            @id @default(uuid()) @db.Uuid
+  key           String            @unique
+  name          String
+  icon          String?
+  audience      ModuleAudience    @default(ORGANIZATION)
+  sortOrder     Int               @default(0)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  submodules    PlatformSubmodule[]
+
+  @@index([audience, sortOrder])
+}
+
+model PlatformSubmodule {
+  id            String         @id @default(uuid()) @db.Uuid
+  moduleId      String         @db.Uuid
+  key           String
+  name          String
+  route         String
+  permissionKey String?
+  sortOrder     Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  module        PlatformModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([moduleId, key])
+  @@unique([route])
+  @@index([permissionKey])
+}
+
+model OrganizationModule {
+  id              String       @id @default(uuid()) @db.Uuid
+  organizationId  String       @db.Uuid
+  moduleKey       String
+  enabled         Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, moduleKey])
+  @@index([organizationId, enabled])
 }

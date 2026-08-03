@@ -7,6 +7,20 @@ export const CurrentUser = createParamDecorator(
       userId: string;
       email: string | null;
       sessionId?: string;
+      organizationContext?: {
+        organizationId: string;
+        organizationSlug: string;
+        organizationName: string;
+        membershipId: string;
+        roleKeys: string[];
+        permissionKeys: string[];
+        branchIds: string[];
+      };
+      platformContext?: {
+        platformAccessId: string;
+        roleKeys: string[];
+        permissionKeys: string[];
+      };
     };
   },
 );

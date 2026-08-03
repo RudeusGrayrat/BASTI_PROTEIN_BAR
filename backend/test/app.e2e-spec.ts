@@ -60,7 +60,7 @@ class TestHealthController {
     },
   ],
 })
-class TestAppModule {}
+class TestAppModule { }
 
 describe('Auth HTTP cookies (e2e)', () => {
   let app: INestApplication;
