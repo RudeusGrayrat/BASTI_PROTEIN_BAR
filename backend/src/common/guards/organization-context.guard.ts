@@ -21,6 +21,7 @@ type AuthenticatedRequest = {
       roleKeys: string[];
       permissionKeys: string[];
       branchIds: string[];
+      moduleKeys: string[];
     };
   };
   headers: Record<string, string | string[] | undefined>;

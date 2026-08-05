@@ -18,6 +18,10 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { OrganizationContextGuard } from '../../../common/guards/organization-context.guard';
 import { PermissionsGuard } from '../../../common/guards/permissions.guard';
 import { CreateOrganizationRoleDto } from './dto/create-organization-role.dto';
+import { CreateInternalRoleDto } from './dto/organization-admin/create-internal-role.dto';
+import { CreateOrganizationUserDto } from './dto/organization-admin/create-organization-user.dto';
+import { UpdateInternalRoleDto } from './dto/organization-admin/update-internal-role.dto';
+import { UpdateOrganizationUserDto } from './dto/organization-admin/update-organization-user.dto';
 import { CreatePlatformModuleDto } from './dto/create-platform-module.dto';
 import { CreatePlatformOrganizationDto } from './dto/create-platform-organization.dto';
 import { CreatePlatformPermissionDto } from './dto/create-platform-permission.dto';
@@ -30,6 +34,7 @@ import { UpdatePlatformRoleDto } from './dto/update-platform-role.dto';
 import { UpdatePlatformSubmoduleDto } from './dto/update-platform-submodule.dto';
 import { UpdatePlatformUserDto } from './dto/update-platform-user.dto';
 import { UpdatePermissionOverridesDto } from './dto/update-permission-overrides.dto';
+import { OrganizationAdminService } from './organization-admin.service';
 import { PlatformAdminService } from './platform-admin.service';
 import { UsersService } from './users.service';
 
@@ -40,6 +45,7 @@ export class ErpAccessController {
     private readonly usersService: UsersService,
     private readonly authorizationService: AuthorizationService,
     private readonly platformAdminService: PlatformAdminService,
+    private readonly organizationAdminService: OrganizationAdminService,
   ) {}
 
   @Get('me')
@@ -80,6 +86,7 @@ export class ErpAccessController {
         roleKeys: string[];
         permissionKeys: string[];
         branchIds: string[];
+        moduleKeys: string[];
       };
     },
     @OrganizationContext()
@@ -91,6 +98,7 @@ export class ErpAccessController {
       roleKeys: string[];
       permissionKeys: string[];
       branchIds: string[];
+      moduleKeys: string[];
     },
   ) {
     return {
@@ -134,6 +142,7 @@ export class ErpAccessController {
         roleKeys: string[];
         permissionKeys: string[];
         branchIds: string[];
+        moduleKeys: string[];
       };
     },
   ) {
@@ -142,6 +151,188 @@ export class ErpAccessController {
       organizationContext: user.organizationContext ?? null,
       allowed: true,
     };
+  }
+
+  @Get('organization/users')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.users.read')
+  listOrganizationUsers(
+    @OrganizationContext()
+    organizationContext: {
+      organizationId: string;
+    },
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.organizationAdminService.listUsers({
+      organizationId: organizationContext.organizationId,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      search,
+    });
+  }
+
+  @Post('organization/users')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.users.create')
+  createOrganizationUser(
+    @OrganizationContext()
+    organizationContext: {
+      organizationId: string;
+      permissionKeys: string[];
+    },
+    @Body() input: CreateOrganizationUserDto,
+  ) {
+    return this.organizationAdminService.createUser(
+      organizationContext.organizationId,
+      organizationContext.permissionKeys,
+      input,
+    );
+  }
+
+  @Patch('organization/users/:membershipId')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.users.assign_roles')
+  updateOrganizationUser(
+    @OrganizationContext()
+    organizationContext: {
+      organizationId: string;
+      permissionKeys: string[];
+    },
+    @Param('membershipId') membershipId: string,
+    @Body() input: UpdateOrganizationUserDto,
+  ) {
+    return this.organizationAdminService.updateUser(
+      organizationContext.organizationId,
+      membershipId,
+      organizationContext.permissionKeys,
+      input,
+    );
+  }
+
+  @Post('organization/users/:membershipId/suspend')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.users.assign_roles')
+  suspendOrganizationUser(
+    @OrganizationContext()
+    organizationContext: {
+      organizationId: string;
+    },
+    @Param('membershipId') membershipId: string,
+  ) {
+    return this.organizationAdminService.updateUserStatus(
+      organizationContext.organizationId,
+      membershipId,
+      'SUSPENDED',
+    );
+  }
+
+  @Post('organization/users/:membershipId/reactivate')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.users.assign_roles')
+  reactivateOrganizationUser(
+    @OrganizationContext()
+    organizationContext: {
+      organizationId: string;
+    },
+    @Param('membershipId') membershipId: string,
+  ) {
+    return this.organizationAdminService.updateUserStatus(
+      organizationContext.organizationId,
+      membershipId,
+      'ACTIVE',
+    );
+  }
+
+  @Get('organization/roles')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.roles.read')
+  listInternalRoles(
+    @OrganizationContext()
+    organizationContext: {
+      organizationId: string;
+    },
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.organizationAdminService.listRoles({
+      organizationId: organizationContext.organizationId,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      search,
+    });
+  }
+
+  @Get('organization/permissions')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.roles.read')
+  listAssignableOrganizationPermissions(
+    @OrganizationContext()
+    organizationContext: {
+      permissionKeys: string[];
+      moduleKeys: string[];
+    },
+  ) {
+    return this.organizationAdminService.listAssignablePermissions({
+      allowedPermissionKeys: organizationContext.permissionKeys,
+      moduleKeys: organizationContext.moduleKeys,
+    });
+  }
+
+  @Post('organization/roles')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.roles.create')
+  createInternalRole(
+    @OrganizationContext()
+    organizationContext: {
+      organizationId: string;
+      permissionKeys: string[];
+    },
+    @Body() input: CreateInternalRoleDto,
+  ) {
+    return this.organizationAdminService.createRole(
+      organizationContext.organizationId,
+      organizationContext.permissionKeys,
+      input,
+    );
+  }
+
+  @Patch('organization/roles/:roleId')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.roles.manage_permissions')
+  updateInternalRole(
+    @OrganizationContext()
+    organizationContext: {
+      organizationId: string;
+      permissionKeys: string[];
+    },
+    @Param('roleId') roleId: string,
+    @Body() input: UpdateInternalRoleDto,
+  ) {
+    return this.organizationAdminService.updateRole(
+      organizationContext.organizationId,
+      roleId,
+      organizationContext.permissionKeys,
+      input,
+    );
+  }
+
+  @Post('organization/roles/:roleId/archive')
+  @UseGuards(OrganizationContextGuard, PermissionsGuard)
+  @RequirePermissions('settings.roles.manage_permissions')
+  archiveInternalRole(
+    @OrganizationContext()
+    organizationContext: {
+      organizationId: string;
+    },
+    @Param('roleId') roleId: string,
+  ) {
+    return this.organizationAdminService.archiveRole(
+      organizationContext.organizationId,
+      roleId,
+    );
   }
 
   @Get('platform/organizations')
@@ -178,6 +369,23 @@ export class ErpAccessController {
   @RequirePermissions('platform.roles.read')
   listOrganizationRoles(@Param('id') id: string) {
     return this.platformAdminService.listOrganizationRoles(id);
+  }
+
+  @Get('platform/organizations/:id/users')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('platform.organizations.read')
+  listPlatformOrganizationUsers(
+    @Param('id') id: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.platformAdminService.listOrganizationUsersForPlatform({
+      organizationId: id,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+      search,
+    });
   }
 
   @Get('platform/modules')

@@ -15,6 +15,7 @@ export const CurrentUser = createParamDecorator(
         roleKeys: string[];
         permissionKeys: string[];
         branchIds: string[];
+        moduleKeys: string[];
       };
       platformContext?: {
         platformAccessId: string;

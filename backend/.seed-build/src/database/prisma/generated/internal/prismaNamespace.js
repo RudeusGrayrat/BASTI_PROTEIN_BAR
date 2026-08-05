@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.defineExtension = exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.OrganizationModuleScalarFieldEnum = exports.PlatformSubmoduleScalarFieldEnum = exports.PlatformModuleScalarFieldEnum = exports.CustomerProfileScalarFieldEnum = exports.MembershipBranchScalarFieldEnum = exports.PlatformAccessPermissionOverrideScalarFieldEnum = exports.MembershipPermissionOverrideScalarFieldEnum = exports.RolePermissionScalarFieldEnum = exports.PlatformAccessRoleScalarFieldEnum = exports.MembershipRoleScalarFieldEnum = exports.PermissionScalarFieldEnum = exports.RoleScalarFieldEnum = exports.PlatformAccessScalarFieldEnum = exports.MembershipScalarFieldEnum = exports.BranchScalarFieldEnum = exports.OrganizationScalarFieldEnum = exports.OAuthAccountScalarFieldEnum = exports.SessionScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.prismaVersion = exports.getExtensionContext = exports.Decimal = exports.Sql = exports.raw = exports.join = exports.empty = exports.sql = exports.PrismaClientValidationError = exports.PrismaClientInitializationError = exports.PrismaClientRustPanicError = exports.PrismaClientUnknownRequestError = exports.PrismaClientKnownRequestError = void 0;
+exports.defineExtension = exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.OrganizationModuleScalarFieldEnum = exports.PlatformSubmoduleScalarFieldEnum = exports.PlatformModuleScalarFieldEnum = exports.CashMovementScalarFieldEnum = exports.CashSessionScalarFieldEnum = exports.CashRegisterScalarFieldEnum = exports.ProductStockScalarFieldEnum = exports.ProductScalarFieldEnum = exports.ProductCategoryScalarFieldEnum = exports.PaymentMethodScalarFieldEnum = exports.OrganizationSettingScalarFieldEnum = exports.CustomerProfileScalarFieldEnum = exports.MembershipBranchScalarFieldEnum = exports.PlatformAccessPermissionOverrideScalarFieldEnum = exports.MembershipPermissionOverrideScalarFieldEnum = exports.RolePermissionScalarFieldEnum = exports.PlatformAccessRoleScalarFieldEnum = exports.MembershipRoleScalarFieldEnum = exports.PermissionScalarFieldEnum = exports.RoleScalarFieldEnum = exports.PlatformAccessScalarFieldEnum = exports.MembershipScalarFieldEnum = exports.BranchScalarFieldEnum = exports.OrganizationScalarFieldEnum = exports.OAuthAccountScalarFieldEnum = exports.SessionScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.prismaVersion = exports.getExtensionContext = exports.Decimal = exports.Sql = exports.raw = exports.join = exports.empty = exports.sql = exports.PrismaClientValidationError = exports.PrismaClientInitializationError = exports.PrismaClientRustPanicError = exports.PrismaClientUnknownRequestError = exports.PrismaClientKnownRequestError = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/client"));
 exports.PrismaClientKnownRequestError = runtime.PrismaClientKnownRequestError;
 exports.PrismaClientUnknownRequestError = runtime.PrismaClientUnknownRequestError;
@@ -76,6 +76,14 @@ exports.ModelName = {
     PlatformAccessPermissionOverride: 'PlatformAccessPermissionOverride',
     MembershipBranch: 'MembershipBranch',
     CustomerProfile: 'CustomerProfile',
+    OrganizationSetting: 'OrganizationSetting',
+    PaymentMethod: 'PaymentMethod',
+    ProductCategory: 'ProductCategory',
+    Product: 'Product',
+    ProductStock: 'ProductStock',
+    CashRegister: 'CashRegister',
+    CashSession: 'CashSession',
+    CashMovement: 'CashMovement',
     PlatformModule: 'PlatformModule',
     PlatformSubmodule: 'PlatformSubmodule',
     OrganizationModule: 'OrganizationModule'
@@ -231,6 +239,112 @@ exports.CustomerProfileScalarFieldEnum = {
     externalCustomerCode: 'externalCustomerCode',
     loyaltyTier: 'loyaltyTier',
     status: 'status',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.OrganizationSettingScalarFieldEnum = {
+    id: 'id',
+    organizationId: 'organizationId',
+    currencyCode: 'currencyCode',
+    timezone: 'timezone',
+    taxRate: 'taxRate',
+    receiptFooter: 'receiptFooter',
+    logoUrl: 'logoUrl',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.PaymentMethodScalarFieldEnum = {
+    id: 'id',
+    organizationId: 'organizationId',
+    code: 'code',
+    name: 'name',
+    type: 'type',
+    enabled: 'enabled',
+    sortOrder: 'sortOrder',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.ProductCategoryScalarFieldEnum = {
+    id: 'id',
+    organizationId: 'organizationId',
+    parentId: 'parentId',
+    name: 'name',
+    slug: 'slug',
+    description: 'description',
+    color: 'color',
+    sortOrder: 'sortOrder',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.ProductScalarFieldEnum = {
+    id: 'id',
+    organizationId: 'organizationId',
+    categoryId: 'categoryId',
+    sku: 'sku',
+    name: 'name',
+    description: 'description',
+    type: 'type',
+    status: 'status',
+    price: 'price',
+    cost: 'cost',
+    taxRate: 'taxRate',
+    trackStock: 'trackStock',
+    availableForPos: 'availableForPos',
+    imageUrl: 'imageUrl',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.ProductStockScalarFieldEnum = {
+    id: 'id',
+    productId: 'productId',
+    branchId: 'branchId',
+    quantity: 'quantity',
+    minQuantity: 'minQuantity',
+    status: 'status',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.CashRegisterScalarFieldEnum = {
+    id: 'id',
+    organizationId: 'organizationId',
+    branchId: 'branchId',
+    code: 'code',
+    name: 'name',
+    status: 'status',
+    sortOrder: 'sortOrder',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.CashSessionScalarFieldEnum = {
+    id: 'id',
+    organizationId: 'organizationId',
+    branchId: 'branchId',
+    cashRegisterId: 'cashRegisterId',
+    openedByUserId: 'openedByUserId',
+    closedByUserId: 'closedByUserId',
+    status: 'status',
+    openingAmount: 'openingAmount',
+    expectedAmount: 'expectedAmount',
+    countedAmount: 'countedAmount',
+    differenceAmount: 'differenceAmount',
+    openedAt: 'openedAt',
+    closedAt: 'closedAt',
+    openingNote: 'openingNote',
+    closingNote: 'closingNote',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.CashMovementScalarFieldEnum = {
+    id: 'id',
+    cashSessionId: 'cashSessionId',
+    paymentMethodId: 'paymentMethodId',
+    createdByUserId: 'createdByUserId',
+    type: 'type',
+    amount: 'amount',
+    concept: 'concept',
+    note: 'note',
+    occurredAt: 'occurredAt',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

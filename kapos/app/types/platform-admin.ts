@@ -79,6 +79,7 @@ export type PlatformMembershipSummary = {
   organizationId: string;
   organizationSlug: string;
   organizationName: string;
+  organizationModuleKeys: string[];
   status: PlatformMembershipStatus;
   title: string | null;
   employeeCode: string | null;
@@ -89,6 +90,32 @@ export type PlatformMembershipSummary = {
   allowPermissionKeys: string[];
   denyPermissionKeys: string[];
   permissionKeys: string[];
+};
+
+export type PlatformOrganizationUserSummary = {
+  id: string;
+  status: PlatformMembershipStatus;
+  title: string | null;
+  employeeCode: string | null;
+  createdAt: string;
+  user: {
+    id: string;
+    email: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    documentType: DocumentType | null;
+    documentNumber: string | null;
+    phone: string | null;
+    status: PlatformUserStatus;
+  };
+  roleScopeKeys: string[];
+  roleNames: string[];
+  roles: Array<{
+    scopeKey: string;
+    key: string;
+    name: string;
+    isSystem: boolean;
+  }>;
 };
 
 export type PaginatedPlatformResponse<T> = {

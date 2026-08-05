@@ -17,6 +17,7 @@ type AdminTableAction<T> = {
   disabled?: boolean;
   icon?: ReactNode;
   active?: (row: T) => boolean;
+  visible?: (row: T) => boolean;
   onClick?: (row: T) => void;
 };
 
@@ -341,56 +342,64 @@ export function AdminDataTable<T>({
           </tr>
         </thead>
         <tbody className="divide-y divide-[#edf1e4]">
-          {tableRows.map((row) => (
-            <tr
-              key={rowKey(row)}
-              className="bg-white transition-colors hover:bg-[#fcfef9]"
-            >
-              {columns.map((column) => (
-                <td
-                  key={column.key}
-                  className={`px-5 py-4 align-top ${
-                    column.align === "center"
-                      ? "text-center"
-                      : column.align === "right"
-                        ? "text-right"
-                        : "text-left"
-                  }`}
-                >
-                  {column.render(row)}
-                </td>
-              ))}
-              {visibleActions.length > 0 ? (
-                <td className="px-5 py-4">
-                  <div className="flex flex-wrap justify-end gap-2 rounded-full border border-[#eef2e4] bg-[#fbfcf8] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-                    {visibleActions.map((action) => (
-                      <div key={action.label} className="group relative">
-                        <HoverTooltip label={action.label}>
-                          <AdminActionButton
-                            aria-label={action.label}
-                            disabled={action.disabled || !action.onClick}
-                            onClick={() => action.onClick?.(row)}
-                            icon={action.icon ?? getActionIcon(action.label)}
-                            active={action.active?.(row) ?? false}
-                            size="icon"
-                            tone={
-                              action.tone === "accent"
-                                ? "accent"
-                                : action.tone === "dark"
-                                  ? "primary"
-                                  : action.tone === "warn"
-                                    ? "danger"
-                                    : "secondary"
-                            }
-                          />
-                        </HoverTooltip>
+          {tableRows.map((row) => {
+            const rowActions = visibleActions.filter(
+              (action) => !action.visible || action.visible(row),
+            );
+
+            return (
+              <tr
+                key={rowKey(row)}
+                className="bg-white transition-colors hover:bg-[#fcfef9]"
+              >
+                {columns.map((column) => (
+                  <td
+                    key={column.key}
+                    className={`px-5 py-4 align-top ${
+                      column.align === "center"
+                        ? "text-center"
+                        : column.align === "right"
+                          ? "text-right"
+                          : "text-left"
+                    }`}
+                  >
+                    {column.render(row)}
+                  </td>
+                ))}
+                {visibleActions.length > 0 ? (
+                  <td className="px-5 py-4">
+                    {rowActions.length > 0 ? (
+                      <div className="flex flex-wrap justify-end gap-2 rounded-full border border-[#eef2e4] bg-[#fbfcf8] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                        {rowActions.map((action) => (
+                          <div key={action.label} className="group relative">
+                            <HoverTooltip label={action.label}>
+                              <AdminActionButton
+                                aria-label={action.label}
+                                disabled={action.disabled || !action.onClick}
+                                onClick={() => action.onClick?.(row)}
+                                icon={action.icon ?? getActionIcon(action.label)}
+                                active={action.active?.(row) ?? false}
+                                size="icon"
+                                tone={
+                                  action.tone === "accent"
+                                    ? "accent"
+                                    : action.tone === "dark"
+                                      ? "primary"
+                                      : action.tone === "warn"
+                                        ? "danger"
+                                        : "secondary"
+                                }
+                              />
+                            </HoverTooltip>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </td>
-              ) : null}
-            </tr>
-          ))}
+                    ) : null}
+                  </td>
+                ) : null}
+              </tr>
+            );
+          })}
         </tbody>
         </table>
       </div>

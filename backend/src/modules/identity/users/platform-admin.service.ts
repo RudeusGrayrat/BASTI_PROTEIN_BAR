@@ -105,9 +105,25 @@ export class PlatformAdminService {
     const page = Math.max(1, input?.page ?? 1);
     const limit = Math.min(100, Math.max(5, input?.limit ?? 10));
     const search = input?.search?.trim();
+    const organizationLeaderRoleKeys = [
+      'organization.owner',
+      'organization.admin',
+    ];
     const linkedMembershipWhere: Prisma.MembershipWhereInput = {
       status: {
         not: MembershipStatus.TERMINATED,
+      },
+    };
+    const organizationLeaderMembershipWhere: Prisma.MembershipWhereInput = {
+      ...linkedMembershipWhere,
+      roleAssignments: {
+        some: {
+          role: {
+            key: {
+              in: organizationLeaderRoleKeys,
+            },
+          },
+        },
       },
     };
     const where: Prisma.UserWhereInput = {
@@ -115,7 +131,7 @@ export class PlatformAdminService {
         {
           OR: [
             { platformAccess: { isNot: null } },
-            { memberships: { some: linkedMembershipWhere } },
+            { memberships: { some: organizationLeaderMembershipWhere } },
           ],
         },
         search
@@ -128,7 +144,7 @@ export class PlatformAdminService {
                 {
                   memberships: {
                     some: {
-                      ...linkedMembershipWhere,
+                      ...organizationLeaderMembershipWhere,
                       organization: {
                         OR: [
                           { legalName: { contains: search, mode: 'insensitive' } },
@@ -219,6 +235,12 @@ export class PlatformAdminService {
                   legalName: true,
                   tradeName: true,
                   slug: true,
+                  modules: {
+                    where: { enabled: true },
+                    select: {
+                      moduleKey: true,
+                    },
+                  },
                 },
               },
               roleAssignments: {
@@ -286,6 +308,9 @@ export class PlatformAdminService {
           organizationSlug: membership.organization.slug,
           organizationName:
             membership.organization.tradeName ?? membership.organization.legalName,
+          organizationModuleKeys: membership.organization.modules.map(
+            (moduleItem) => moduleItem.moduleKey,
+          ),
           status: membership.status,
           title: membership.title,
           employeeCode: membership.employeeCode,
@@ -349,6 +374,102 @@ export class PlatformAdminService {
 
     return {
       data,
+      total,
+      page,
+      limit,
+    };
+  }
+
+  async listOrganizationUsersForPlatform(input: {
+    organizationId: string;
+    page?: number;
+    limit?: number;
+    search?: string;
+  }) {
+    await this.ensureOrganizationExists(input.organizationId);
+
+    const page = Math.max(1, input.page ?? 1);
+    const limit = Math.min(100, Math.max(5, input.limit ?? 10));
+    const search = input.search?.trim();
+    const where: Prisma.MembershipWhereInput = {
+      organizationId: input.organizationId,
+      status: { not: MembershipStatus.TERMINATED },
+      ...(search
+        ? {
+            OR: [
+              { title: { contains: search, mode: 'insensitive' } },
+              { employeeCode: { contains: search, mode: 'insensitive' } },
+              { user: { email: { contains: search, mode: 'insensitive' } } },
+              { user: { firstName: { contains: search, mode: 'insensitive' } } },
+              { user: { lastName: { contains: search, mode: 'insensitive' } } },
+              { user: { documentNumber: { contains: search, mode: 'insensitive' } } },
+            ],
+          }
+        : {}),
+    };
+
+    const [memberships, total] = await Promise.all([
+      this.prismaService.membership.findMany({
+        where,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: [{ createdAt: 'desc' }],
+        select: {
+          id: true,
+          status: true,
+          title: true,
+          employeeCode: true,
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              firstName: true,
+              lastName: true,
+              documentType: true,
+              documentNumber: true,
+              phone: true,
+              status: true,
+            },
+          },
+          roleAssignments: {
+            select: {
+              role: {
+                select: {
+                  scopeKey: true,
+                  key: true,
+                  name: true,
+                  isSystem: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prismaService.membership.count({ where }),
+    ]);
+
+    return {
+      data: memberships.map((membership) => ({
+        id: membership.id,
+        status: membership.status,
+        title: membership.title,
+        employeeCode: membership.employeeCode,
+        createdAt: membership.createdAt,
+        user: membership.user,
+        roleScopeKeys: membership.roleAssignments.map(
+          (assignment) => assignment.role.scopeKey,
+        ),
+        roleNames: membership.roleAssignments.map(
+          (assignment) => assignment.role.name,
+        ),
+        roles: membership.roleAssignments.map((assignment) => ({
+          scopeKey: assignment.role.scopeKey,
+          key: assignment.role.key,
+          name: assignment.role.name,
+          isSystem: assignment.role.isSystem,
+        })),
+      })),
       total,
       page,
       limit,

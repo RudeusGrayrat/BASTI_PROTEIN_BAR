@@ -23,6 +23,7 @@ import { useAuth } from "../../../context/auth-context";
 import {
   createPlatformOrganization,
   getPlatformModules,
+  getPlatformOrganizationUsers,
   getPlatformOrganizations,
   getPlatformUsers,
   updatePlatformOrganization,
@@ -34,6 +35,7 @@ import {
 import type {
   PlatformGlobalUserSummary,
   PlatformModuleSummary,
+  PlatformOrganizationUserSummary,
   PlatformOrganizationSummary,
 } from "../../../types/platform-admin";
 import { isApiError } from "../../../lib/api";
@@ -44,6 +46,11 @@ export default function PlatformOrganizationsPage() {
   const [organizations, setOrganizations] = useState<PlatformOrganizationSummary[]>([]);
   const [modules, setModules] = useState<PlatformModuleSummary[]>([]);
   const [users, setUsers] = useState<PlatformGlobalUserSummary[]>([]);
+  const [organizationUsers, setOrganizationUsers] = useState<
+    PlatformOrganizationUserSummary[]
+  >([]);
+  const [isLoadingOrganizationUsers, setIsLoadingOrganizationUsers] =
+    useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -191,6 +198,29 @@ export default function PlatformOrganizationsPage() {
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(search)),
     })(input);
+  }
+
+  async function loadOrganizationUsers(organizationId: string) {
+    setIsLoadingOrganizationUsers(true);
+
+    try {
+      const token = await resolveToken();
+
+      if (!token) {
+        throw new Error("No se pudo restaurar la sesion del superadmin.");
+      }
+
+      const response = await getPlatformOrganizationUsers(token, organizationId, {
+        page: 1,
+        limit: 8,
+      });
+
+      setOrganizationUsers(response.data);
+    } catch {
+      setOrganizationUsers([]);
+    } finally {
+      setIsLoadingOrganizationUsers(false);
+    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -416,15 +446,14 @@ export default function PlatformOrganizationsPage() {
         />
       ) : null}
 
-      <div className="grid gap-5 xl:grid-cols-[1.3fr_0.7fr]">
-        <PanelCard
+      <PanelCard
           title={viewMode === "create" ? "Crear organizacion" : "Cartera real"}
           description={
             viewMode === "create"
               ? "Alta funcional para nuevos clientes. Aqui naces la empresa, asignas owner si ya existe y dejas prendidos los modulos base."
               : "Base actual obtenida desde la base de datos de Kapos."
           }
-        >
+      >
           {viewMode === "create" ? (
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="grid gap-4 md:grid-cols-2">
@@ -578,6 +607,7 @@ export default function PlatformOrganizationsPage() {
                   onClick: (organization) => {
                     setOverlayMode("detail");
                     setSelectedOrganization(organization);
+                    void loadOrganizationUsers(organization.id);
                   },
                 },
                 {
@@ -596,31 +626,26 @@ export default function PlatformOrganizationsPage() {
           )}
         </PanelCard>
 
-        <PanelCard
-          title="Flujo rapido"
-          description="Orden minimo para dar de alta una empresa sin dañar la arquitectura."
-        >
-          <div className="space-y-3">
+        <div className="hidden">
+          <ol className="space-y-2 text-sm leading-6 text-[#46523a]">
             {[
-              "1. Crear organizacion y definir su slug unico.",
-              "2. Crear o vincular el owner global de esa empresa.",
-              "3. Encender los modulos organization que le correspondan.",
-              "4. Dejar listo el acceso para que el owner configure sucursales y personal.",
+              "Crear organizacion y slug unico.",
+              "Crear o vincular owner.",
+              "Encender modulos organization.",
+              "El owner configura sucursales y personal.",
             ].map((step, index) => (
-              <div
+              <li
                 key={step}
-                className="rounded-[24px] border border-[#edf1e4] bg-[#fafcf6] px-4 py-4"
+                className="flex gap-3 rounded-[18px] border border-[#edf1e4] bg-[#fafcf6] px-3 py-2"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#91aa47]">
-                  Paso {index + 1}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-[#46523a]">{step}</p>
-              </div>
+                <span className="font-semibold text-[#91aa47]">{index + 1}.</span>
+                <span>{step}</span>
+              </li>
             ))}
-          </div>
+          </ol>
 
           {!isLoading && organizationModules.length > 0 ? (
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               {organizationModules.slice(0, 6).map((moduleItem) => (
                 <Tag key={moduleItem.id} tone="soft">
                   {moduleItem.name} · {formatModuleAudience(moduleItem.audience)}
@@ -628,12 +653,14 @@ export default function PlatformOrganizationsPage() {
               ))}
             </div>
           ) : null}
-        </PanelCard>
-      </div>
+        </div>
 
       <AdminOverlayPanel
         open={Boolean(selectedOrganization)}
-        onClose={() => setSelectedOrganization(null)}
+        onClose={() => {
+          setSelectedOrganization(null);
+          setOrganizationUsers([]);
+        }}
         eyebrow="Organizacion"
         title={
           selectedOrganization?.tradeName ??
@@ -643,7 +670,13 @@ export default function PlatformOrganizationsPage() {
         description="Panel rapido para revisar la salud de un cliente y decidir si debes editarlo, suspenderlo o continuar con su configuracion."
         footer={
           <div className="flex justify-end gap-3">
-            <AdminActionButton tone="ghost" onClick={() => setSelectedOrganization(null)}>
+            <AdminActionButton
+              tone="ghost"
+              onClick={() => {
+                setSelectedOrganization(null);
+                setOrganizationUsers([]);
+              }}
+            >
               Cerrar
             </AdminActionButton>
             {overlayMode === "edit" ? (
@@ -818,6 +851,72 @@ export default function PlatformOrganizationsPage() {
                   </p>
                 </article>
               </div>
+
+              <article className="rounded-[28px] border border-[#e7edd5] bg-white/90 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.26em] text-[#8ba23f]">
+                      Usuarios internos
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#61704c]">
+                      Personas vinculadas a esta empresa. No se mezclan con los
+                      usuarios globales de Kapos.
+                    </p>
+                  </div>
+                  <Tag tone="soft">{organizationUsers.length} visibles</Tag>
+                </div>
+
+                <div className="mt-4 space-y-3">
+                  {isLoadingOrganizationUsers ? (
+                    <p className="rounded-[22px] border border-[#edf1e4] bg-[#fbfcf8] px-4 py-4 text-sm text-[#61704c]">
+                      Cargando usuarios de esta organizacion...
+                    </p>
+                  ) : organizationUsers.length > 0 ? (
+                    organizationUsers.map((membership) => (
+                      <div
+                        key={membership.id}
+                        className="grid gap-3 rounded-[22px] border border-[#edf1e4] bg-[#fbfcf8] px-4 py-4 md:grid-cols-[1fr_auto]"
+                      >
+                        <div>
+                          <p className="font-semibold text-[#1b2111]">
+                            {[
+                              membership.user.firstName,
+                              membership.user.lastName,
+                            ]
+                              .filter(Boolean)
+                              .join(" ") ||
+                              membership.user.email ||
+                              membership.user.documentNumber ||
+                              "Usuario sin nombre"}
+                          </p>
+                          <p className="mt-1 text-xs text-[#7a845f]">
+                            {membership.user.email ?? "Sin correo"} -{" "}
+                            {membership.employeeCode ?? "Sin codigo interno"}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                          <Tag
+                            tone={
+                              membership.status === "ACTIVE" ? "accent" : "dark"
+                            }
+                          >
+                            {membership.status}
+                          </Tag>
+                          {membership.roleNames.slice(0, 3).map((roleName) => (
+                            <Tag key={roleName} tone="soft">
+                              {roleName}
+                            </Tag>
+                          ))}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="rounded-[22px] border border-[#edf1e4] bg-[#fbfcf8] px-4 py-4 text-sm text-[#61704c]">
+                      Esta organizacion aun no tiene usuarios internos vinculados.
+                    </p>
+                  )}
+                </div>
+              </article>
             </div>
           )
         ) : null}

@@ -9,6 +9,7 @@ import type {
   CreatePlatformUserInput,
   PaginatedPlatformResponse,
   PlatformGlobalUserSummary,
+  PlatformOrganizationUserSummary,
   PlatformModuleSummary,
   PlatformOrganizationSummary,
   PlatformPermissionSummary,
@@ -68,6 +69,36 @@ export function getPlatformRoles(accessToken: string) {
 export function getOrganizationRoles(accessToken: string, organizationId: string) {
   return apiRequest<PlatformRoleTemplate[]>(
     `/erp/access/platform/organizations/${organizationId}/roles`,
+    {
+      method: "GET",
+      accessToken,
+    },
+  );
+}
+
+export function getPlatformOrganizationUsers(
+  accessToken: string,
+  organizationId: string,
+  input?: { page?: number; limit?: number; search?: string },
+) {
+  const params = new URLSearchParams();
+
+  if (input?.page) {
+    params.set("page", String(input.page));
+  }
+
+  if (input?.limit) {
+    params.set("limit", String(input.limit));
+  }
+
+  if (input?.search?.trim()) {
+    params.set("search", input.search.trim());
+  }
+
+  const query = params.toString();
+
+  return apiRequest<PaginatedPlatformResponse<PlatformOrganizationUserSummary>>(
+    `/erp/access/platform/organizations/${organizationId}/users${query ? `?${query}` : ""}`,
     {
       method: "GET",
       accessToken,

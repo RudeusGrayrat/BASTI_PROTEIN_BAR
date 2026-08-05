@@ -1,35 +1,66 @@
-# Node
+# Dependencias
 node_modules/
-
-# Cualquier node_modules dentro de subcarpetas
 **/node_modules/
+.pnpm-store/
+**/.pnpm-store/
 
 # Logs
 *.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
 
 # Variables de entorno
 .env
 .env.*
+!.env.example
+!.env.template
 
-# Compilados
+# Builds y caches de frontend/backend
 dist/
 **/dist/
-
+build/
+**/build/
 .next/
 **/.next/
-
+out/
+**/out/
 coverage/
+**/coverage/
+*.tsbuildinfo
 
-# Prisma
+# Prisma y generados
 prisma/dev.db
+**/prisma/dev.db
+**/src/database/prisma/generated/
+**/generated/prisma/
 
-# VS Code
+# Temporales internos
+**/.seed-build/
+**/.temp/
+**/.tmp/
+**/tmp/
+**/temp/
+
+# Editores
 .vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
 
 # Sistema operativo
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Flutter
+# Flutter/Dart
 **/.dart_tool/
-**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub-cache/
+**/.pub/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/

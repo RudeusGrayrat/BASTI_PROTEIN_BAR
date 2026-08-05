@@ -11,14 +11,21 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Banknote,
+  BarChart3,
   CircleUserRound,
   FileText,
   Grid2x2,
+  LayoutDashboard,
   LogOut,
+  Package,
+  Receipt,
   Settings,
   ShieldCheck,
+  ShoppingBag,
   TrendingUp,
+  Truck,
   Users,
+  Wallet,
 } from "lucide-react";
 import { useAuth } from "../context/auth-context";
 import { HoverTooltip } from "./ui/HoverTooltip";
@@ -49,6 +56,9 @@ const ICONS = {
   dashboard: (
     <Grid2x2 className="h-5 w-5" strokeWidth={2.2} />
   ),
+  "layout-dashboard": (
+    <LayoutDashboard className="h-5 w-5" strokeWidth={2.2} />
+  ),
   rrhh: (
     <Users className="h-5 w-5" strokeWidth={2.2} />
   ),
@@ -60,6 +70,36 @@ const ICONS = {
   ),
   sales: (
     <TrendingUp className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  "shopping-bag": (
+    <ShoppingBag className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  cash: (
+    <Wallet className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  wallet: (
+    <Wallet className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  catalog: (
+    <Package className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  package: (
+    <Package className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  billing: (
+    <Receipt className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  receipt: (
+    <Receipt className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  reports: (
+    <BarChart3 className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  "bar-chart-3": (
+    <BarChart3 className="h-5 w-5" strokeWidth={2.2} />
+  ),
+  truck: (
+    <Truck className="h-5 w-5" strokeWidth={2.2} />
   ),
   settings: (
     <Settings className="h-5 w-5" strokeWidth={2.2} />
@@ -259,10 +299,26 @@ function filterCatalogByActiveContext(
 ) {
   const platformPermissions = new Set(platformContext?.permissionKeys ?? []);
   const organizationPermissions = new Set(activeOrganization?.permissionKeys ?? []);
+  const organizationModules = new Set(activeOrganization?.moduleKeys ?? []);
 
   return catalog
     .map((moduleItem) => {
       const filteredSubmodules = moduleItem.submodules.filter((submodule) => {
+        if (
+          moduleItem.audience === "ORGANIZATION" &&
+          !organizationModules.has(moduleItem.key)
+        ) {
+          return false;
+        }
+
+        if (
+          moduleItem.audience === "BOTH" &&
+          !platformContext &&
+          !organizationModules.has(moduleItem.key)
+        ) {
+          return false;
+        }
+
         if (!submodule.permissionKey) {
           return true;
         }
@@ -327,8 +383,10 @@ export default function SideBar() {
             platformContext,
             activeOrganization,
           ).map(mapNavigationModuleToCategory)
-        : CATEGORIES.filter(
-            (category) => !category.requiresPlatform || Boolean(platformContext),
+        : CATEGORIES.filter((category) =>
+            ["dashboard", "platform"].includes(category.key)
+              ? !category.requiresPlatform || Boolean(platformContext)
+              : false,
           ),
     [activeOrganization, navigationCatalog, platformContext],
   );

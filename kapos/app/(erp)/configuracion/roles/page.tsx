@@ -1,70 +1,300 @@
-import { adminRoleTemplates } from "../../../lib/admin-console-data";
+"use client";
+
+import { useEffect, useState } from "react";
 import {
+  AdminActionButton,
+  PencilIcon,
+  PlusIcon,
+  TrashIcon,
+} from "../../../components/admin/AdminActionButton";
+import { AdminDataTable } from "../../../components/admin/AdminDataTable";
+import {
+  AdminMessage,
   AdminPageHeader,
   PanelCard,
   StatCard,
   Tag,
 } from "../../../components/admin/AdminBlocks";
+import { AdminOverlayPanel } from "../../../components/admin/AdminOverlayPanel";
+import { useAuth } from "../../../context/auth-context";
+import {
+  archiveInternalRole,
+  createInternalRole,
+  getAssignableOrganizationPermissions,
+  getInternalRoles,
+  updateInternalRole,
+} from "../../../lib/erp-api";
+import type {
+  InternalRoleSummary,
+  OrganizationPermissionSummary,
+} from "../../../types/erp";
+
+type RoleForm = {
+  key: string;
+  name: string;
+  description: string;
+  permissionKeys: string[];
+};
+
+function emptyRoleForm(): RoleForm {
+  return { key: "", name: "", description: "", permissionKeys: [] };
+}
+
+function groupPermissions(permissions: OrganizationPermissionSummary[]) {
+  return permissions.reduce<Record<string, OrganizationPermissionSummary[]>>(
+    (groups, permission) => {
+      const label = `${permission.moduleKey ?? "general"} / ${permission.submoduleKey ?? "general"}`;
+      groups[label] = [...(groups[label] ?? []), permission];
+      return groups;
+    },
+    {},
+  );
+}
 
 export default function ConfigRolesPage() {
+  const { accessToken, activeOrganizationId, effectivePermissionKeys, refreshSession } = useAuth();
+  const [roles, setRoles] = useState<InternalRoleSummary[]>([]);
+  const [permissions, setPermissions] = useState<OrganizationPermissionSummary[]>([]);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [mode, setMode] = useState<"table" | "create">("table");
+  const [form, setForm] = useState<RoleForm>(emptyRoleForm());
+  const [selectedRole, setSelectedRole] = useState<InternalRoleSummary | null>(null);
+  const [editForm, setEditForm] = useState<RoleForm>(emptyRoleForm());
+  const [error, setError] = useState<string | null>(null);
+
+  async function resolveToken() {
+    return accessToken ?? (await refreshSession({ silent: true }))?.accessToken ?? null;
+  }
+
+  async function loadPermissions() {
+    const token = await resolveToken();
+    if (!token || !activeOrganizationId) return [];
+    const rows = await getAssignableOrganizationPermissions({
+      accessToken: token,
+      organizationId: activeOrganizationId,
+    });
+    setPermissions(rows);
+    return rows;
+  }
+
+  async function fetchRoles(input: { page: number; limit: number; search: string }) {
+    const token = await resolveToken();
+    if (!token || !activeOrganizationId) throw new Error("No hay organizacion activa.");
+    const [response] = await Promise.all([
+      getInternalRoles({
+        accessToken: token,
+        organizationId: activeOrganizationId,
+        page: input.page,
+        limit: input.limit,
+        search: input.search,
+      }),
+      loadPermissions(),
+    ]);
+    setRoles(response.data);
+    return { data: response.data, total: response.total };
+  }
+
+  useEffect(() => setReloadKey((current) => current + 1), [activeOrganizationId]);
+
+  function togglePermission(target: "create" | "edit", permissionKey: string) {
+    const updater = (current: RoleForm) => ({
+      ...current,
+      permissionKeys: current.permissionKeys.includes(permissionKey)
+        ? current.permissionKeys.filter((key) => key !== permissionKey)
+        : [...current.permissionKeys, permissionKey],
+    });
+
+    if (target === "create") setForm(updater);
+    else setEditForm(updater);
+  }
+
+  async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const token = await resolveToken();
+    if (!token || !activeOrganizationId) return;
+    setError(null);
+    try {
+      await createInternalRole({
+        accessToken: token,
+        organizationId: activeOrganizationId,
+        body: {
+          key: form.key,
+          name: form.name,
+          description: form.description,
+          permissionKeys: form.permissionKeys,
+        },
+      });
+      setForm(emptyRoleForm());
+      setMode("table");
+      setReloadKey((current) => current + 1);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "No se pudo crear el rol.");
+    }
+  }
+
+  function openEditor(role: InternalRoleSummary) {
+    setSelectedRole(role);
+    setEditForm({
+      key: role.key,
+      name: role.name,
+      description: role.description ?? "",
+      permissionKeys: role.permissionKeys,
+    });
+  }
+
+  async function handleUpdate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const token = await resolveToken();
+    if (!token || !activeOrganizationId || !selectedRole) return;
+    setError(null);
+    try {
+      await updateInternalRole({
+        accessToken: token,
+        organizationId: activeOrganizationId,
+        roleId: selectedRole.id,
+        body: {
+          name: editForm.name,
+          description: editForm.description,
+          permissionKeys: editForm.permissionKeys,
+        },
+      });
+      setSelectedRole(null);
+      setReloadKey((current) => current + 1);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "No se pudo editar el rol.");
+    }
+  }
+
+  async function handleArchive(role: InternalRoleSummary) {
+    const token = await resolveToken();
+    if (!token || !activeOrganizationId || role.isSystem) return;
+    setError(null);
+    try {
+      await archiveInternalRole({
+        accessToken: token,
+        organizationId: activeOrganizationId,
+        roleId: role.id,
+      });
+      setReloadKey((current) => current + 1);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "No se pudo archivar el rol.");
+    }
+  }
+
+  const permissionGroups = groupPermissions(permissions);
+
+  function renderPermissionSelector(target: "create" | "edit", values: string[]) {
+    return (
+      <div className="space-y-4">
+        {Object.entries(permissionGroups).map(([group, items]) => (
+          <div key={group} className="rounded-[24px] border border-[#edf1e4] bg-white/80 p-4">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#7a8b45]">{group}</p>
+            <div className="flex flex-wrap gap-2">
+              {items.map((permission) => (
+                <AdminActionButton
+                  key={permission.key}
+                  size="sm"
+                  tone="secondary"
+                  active={values.includes(permission.key)}
+                  onClick={() => togglePermission(target, permission.key)}
+                >
+                  {permission.name}
+                </AdminActionButton>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <section className="space-y-8">
       <AdminPageHeader
         eyebrow="Configuracion"
-        title="Roles y permisos internos"
-        description="Aqui el owner o admin de una empresa crea perfiles derivados de lo que Kapos ya le habilito desde superadmin."
+        title="Roles internos"
+        description="Crea roles personalizados para la organizacion activa sin delegar permisos superiores a los tuyos."
         action={
-          <button className="rounded-full border border-[#d6debf] bg-white px-5 py-3 text-sm font-semibold text-[#243016] transition hover:border-[#91aa47]">
-            Crear rol
-          </button>
+          <div className="flex gap-2">
+            <AdminActionButton tone="secondary" active={mode === "table"} onClick={() => setMode("table")}>Tabla</AdminActionButton>
+            <AdminActionButton tone="primary" active={mode === "create"} icon={<PlusIcon />} onClick={() => setMode("create")}>Crear rol</AdminActionButton>
+          </div>
         }
       />
-
       <div className="grid gap-4 md:grid-cols-3">
-        <StatCard
-          label="Owners"
-          value="1"
-          hint="Perfil maximo dentro de la organizacion."
-          tone="dark"
-        />
-        <StatCard
-          label="Admins internos"
-          value="3"
-          hint="Roles que ya pueden delegar operacion diaria."
-          tone="accent"
-        />
-        <StatCard
-          label="Operadores"
-          value="12"
-          hint="Flujos limitados a tareas concretas de cada modulo."
-        />
+        <StatCard label="Roles visibles" value={String(roles.length)} hint="Sistema y personalizados." tone="dark" />
+        <StatCard label="Personalizados" value={String(roles.filter((role) => !role.isSystem).length)} hint="Creados por la organizacion." tone="accent" />
+        <StatCard label="Permisos delegables" value={String(permissions.length)} hint="Limite real del owner/admin." />
       </div>
+      {error ? <AdminMessage title="No pudimos completar la accion" description={error} tone="warn" /> : null}
 
-      <PanelCard
-        title="Plantillas de referencia"
-        description="Base visual para luego permitir crear, editar o archivar roles propios del cliente."
+      {mode === "create" ? (
+        <PanelCard title="Crear rol personalizado" description="Ejemplo: cajero-sede-centro, supervisor-turno o almacen-basico.">
+          <form className="space-y-5" onSubmit={handleCreate}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Key</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm lowercase outline-none transition focus:border-[#a9cf24]" placeholder="cajero.personalizado" value={form.key} onChange={(event) => setForm((current) => ({ ...current, key: event.target.value.toLowerCase() }))} required /></label>
+              <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Nombre</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" placeholder="Cajero personalizado" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} required /></label>
+            </div>
+            <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Descripcion</span><textarea className="min-h-24 w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} /></label>
+            {renderPermissionSelector("create", form.permissionKeys)}
+            <div className="flex justify-end gap-3">
+              <AdminActionButton tone="ghost" onClick={() => setMode("table")}>Cancelar</AdminActionButton>
+              <AdminActionButton type="submit" tone="primary" icon={<PlusIcon />}>Guardar rol</AdminActionButton>
+            </div>
+          </form>
+        </PanelCard>
+      ) : (
+        <PanelCard title="Tabla de roles" description="Los roles de sistema se usan como base; solo los personalizados se editan o archivan aqui.">
+          <AdminDataTable
+            fetchData={fetchRoles}
+            reloadKey={reloadKey}
+            rowKey={(row) => row.id}
+            permissionKeys={effectivePermissionKeys}
+            searchPlaceholder="Buscar rol..."
+            emptyTitle="Aun no hay roles"
+            emptyDescription="Crea un rol personalizado para esta organizacion."
+            columns={[
+              { key: "name", label: "Rol", render: (row) => <div><p className="font-semibold text-[#1b2111]">{row.name}</p><p className="text-xs text-[#7a845f]">{row.key}</p></div> },
+              { key: "type", label: "Tipo", render: (row) => <Tag tone={row.isSystem ? "dark" : "accent"}>{row.isSystem ? "Sistema" : "Personalizado"}</Tag> },
+              { key: "permissions", label: "Permisos", align: "center", render: (row) => row.permissionCount },
+              { key: "members", label: "Usuarios", align: "center", render: (row) => row.memberCount },
+            ]}
+            actions={[
+              { label: "Editar", permission: "settings.roles.manage_permissions", icon: <PencilIcon />, disabled: false, onClick: openEditor },
+              { label: "Archivar", permission: "settings.roles.manage_permissions", tone: "warn", icon: <TrashIcon />, onClick: handleArchive },
+            ]}
+          />
+        </PanelCard>
+      )}
+
+      <AdminOverlayPanel
+        open={Boolean(selectedRole)}
+        onClose={() => setSelectedRole(null)}
+        eyebrow="Rol interno"
+        title={selectedRole?.isSystem ? "Ver rol de sistema" : "Editar rol personalizado"}
+        description={selectedRole?.isSystem ? "Los roles base no se editan desde la organizacion; crea uno personalizado si necesitas variantes." : "Actualiza nombre, descripcion y permisos delegables."}
+        footer={
+          <div className="flex justify-end gap-3">
+            <AdminActionButton tone="ghost" onClick={() => setSelectedRole(null)}>Cerrar</AdminActionButton>
+            {!selectedRole?.isSystem ? (
+              <AdminActionButton tone="primary" onClick={() => (document.getElementById("internal-role-edit-form") as HTMLFormElement | null)?.requestSubmit()}>Guardar cambios</AdminActionButton>
+            ) : null}
+          </div>
+        }
       >
-        <div className="grid gap-4 lg:grid-cols-2">
-          {adminRoleTemplates
-            .filter((role) => role.scope === "Organization")
-            .map((role) => (
-              <article
-                key={role.key}
-                className="rounded-[26px] border border-[#eef2e5] bg-[#fbfcf8] p-5"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-lg font-semibold text-[#1b2111]">
-                    {role.label}
-                  </h3>
-                  <Tag tone="accent">{role.permissionCount} permisos</Tag>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-[#5c6646]">
-                  {role.summary}
-                </p>
-              </article>
-            ))}
-        </div>
-      </PanelCard>
+        <form id="internal-role-edit-form" className="space-y-5" onSubmit={handleUpdate}>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Key</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-[#f8faf2] px-4 py-3 text-sm outline-none" value={editForm.key} disabled /></label>
+            <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Nombre</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={editForm.name} onChange={(event) => setEditForm((current) => ({ ...current, name: event.target.value }))} disabled={selectedRole?.isSystem} required /></label>
+          </div>
+          <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Descripcion</span><textarea className="min-h-24 w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={editForm.description} onChange={(event) => setEditForm((current) => ({ ...current, description: event.target.value }))} disabled={selectedRole?.isSystem} /></label>
+          {selectedRole?.isSystem ? (
+            <div className="flex flex-wrap gap-2">
+              {editForm.permissionKeys.map((key) => <Tag key={key}>{key}</Tag>)}
+            </div>
+          ) : renderPermissionSelector("edit", editForm.permissionKeys)}
+        </form>
+      </AdminOverlayPanel>
     </section>
   );
 }

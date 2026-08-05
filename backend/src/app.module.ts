@@ -7,6 +7,7 @@ import { HttpLoggingMiddleware } from './common/middleware/http-logging.middlewa
 import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { IdentityModule } from './modules/identity/identity.module';
+import { ErpModule } from './modules/erp/erp.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { IdentityModule } from './modules/identity/identity.module';
     }),
     AuthorizationModule,
     IdentityModule,
+    ErpModule,
   ],
   controllers: [AppController],
   providers: [AppService],

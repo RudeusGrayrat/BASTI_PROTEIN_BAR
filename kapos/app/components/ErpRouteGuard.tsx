@@ -29,10 +29,26 @@ function getAllowedRoutes(
 ) {
   const platformPermissions = new Set(platformContext?.permissionKeys ?? []);
   const organizationPermissions = new Set(activeOrganization?.permissionKeys ?? []);
+  const organizationModules = new Set(activeOrganization?.moduleKeys ?? []);
 
   return catalog.flatMap((moduleItem) =>
     moduleItem.submodules
       .filter((submodule) => {
+        if (
+          moduleItem.audience === "ORGANIZATION" &&
+          !organizationModules.has(moduleItem.key)
+        ) {
+          return false;
+        }
+
+        if (
+          moduleItem.audience === "BOTH" &&
+          !platformContext &&
+          !organizationModules.has(moduleItem.key)
+        ) {
+          return false;
+        }
+
         if (!submodule.permissionKey) {
           return true;
         }

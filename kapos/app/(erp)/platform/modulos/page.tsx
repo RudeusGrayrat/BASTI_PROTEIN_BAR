@@ -541,6 +541,9 @@ export default function PlatformModulesPage() {
                       setModuleForm((current) => ({ ...current, sortOrder: event.target.value }))
                     }
                   />
+                  <p className="text-xs leading-5 text-[#74805f]">
+                    Menor numero aparece primero en el sidebar. Usa saltos de 10 para poder insertar modulos entre medio.
+                  </p>
                 </label>
               </div>
 
@@ -670,6 +673,9 @@ export default function PlatformModulesPage() {
                       }))
                     }
                   />
+                  <p className="text-xs leading-5 text-[#74805f]">
+                    Controla el orden dentro del panel lateral del modulo padre.
+                  </p>
                 </label>
               </div>
 
@@ -792,6 +798,12 @@ export default function PlatformModulesPage() {
                     label: "Permission key",
                     render: (row) => row.permissionKey ?? "Sin permiso visible",
                   },
+                  {
+                    key: "orden",
+                    label: "Orden",
+                    align: "center",
+                    render: (row) => row.sortOrder,
+                  },
                 ]}
                 actions={[
                   {
@@ -859,7 +871,7 @@ export default function PlatformModulesPage() {
               <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Nombre</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={moduleEditForm.name} onChange={(event) => setModuleEditForm((current) => current ? { ...current, name: event.target.value } : current)} required /></label>
               <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Icono</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={moduleEditForm.icon} onChange={(event) => setModuleEditForm((current) => current ? { ...current, icon: event.target.value } : current)} /></label>
               <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Audience</span><select className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={moduleEditForm.audience} onChange={(event) => setModuleEditForm((current) => current ? { ...current, audience: event.target.value as typeof moduleEditForm.audience } : current)}><option value="ORGANIZATION">Organization</option><option value="PLATFORM">Platform</option><option value="BOTH">Both</option></select></label>
-              <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Orden</span><input type="number" min="0" className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={moduleEditForm.sortOrder} onChange={(event) => setModuleEditForm((current) => current ? { ...current, sortOrder: event.target.value } : current)} /></label>
+              <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Orden</span><input type="number" min="0" className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={moduleEditForm.sortOrder} onChange={(event) => setModuleEditForm((current) => current ? { ...current, sortOrder: event.target.value } : current)} /><p className="text-xs leading-5 text-[#74805f]">Menor numero aparece primero en el sidebar. Ejemplo: Catalogo 20, Caja 30, Configuracion 90.</p></label>
             </form>
           ) : (
             <div className="space-y-4">
@@ -938,7 +950,7 @@ export default function PlatformModulesPage() {
             onSubmit={handleUpdateSubmodule}
           >
             <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Nombre</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={submoduleEditForm.name} onChange={(event) => setSubmoduleEditForm((current) => current ? { ...current, name: event.target.value } : current)} required /></label>
-            <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Orden</span><input type="number" min="0" className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={submoduleEditForm.sortOrder} onChange={(event) => setSubmoduleEditForm((current) => current ? { ...current, sortOrder: event.target.value } : current)} /></label>
+            <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Orden</span><input type="number" min="0" className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={submoduleEditForm.sortOrder} onChange={(event) => setSubmoduleEditForm((current) => current ? { ...current, sortOrder: event.target.value } : current)} /><p className="text-xs leading-5 text-[#74805f]">Menor numero aparece primero dentro de su modulo.</p></label>
             <label className="space-y-2 md:col-span-2"><span className="text-sm font-semibold text-[#21300f]">Route</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={submoduleEditForm.route} onChange={(event) => setSubmoduleEditForm((current) => current ? { ...current, route: event.target.value } : current)} required /></label>
             <label className="space-y-2 md:col-span-2"><span className="text-sm font-semibold text-[#21300f]">Permission key</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={submoduleEditForm.permissionKey} onChange={(event) => setSubmoduleEditForm((current) => current ? { ...current, permissionKey: event.target.value } : current)} /></label>
           </form>

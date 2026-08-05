@@ -34,6 +34,7 @@ export type MembershipAccessSummary = {
   roleKeys: string[];
   permissionKeys: string[];
   branchIds: string[];
+  moduleKeys: string[];
 };
 
 export type NavigationSubmodule = {

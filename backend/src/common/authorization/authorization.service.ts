@@ -16,6 +16,7 @@ export type OrganizationAuthorizationContext = {
   roleKeys: string[];
   permissionKeys: string[];
   branchIds: string[];
+  moduleKeys: string[];
 };
 
 export type PlatformAuthorizationContext = {
@@ -79,6 +80,10 @@ export class AuthorizationService {
             slug: true,
             legalName: true,
             tradeName: true,
+            modules: {
+              where: { enabled: true },
+              select: { moduleKey: true },
+            },
           },
         },
         branchAccess: {
@@ -143,6 +148,7 @@ export class AuthorizationService {
       roleKeys,
       permissionKeys,
       branchIds: membership.branchAccess.map((branchAccess) => branchAccess.branchId),
+      moduleKeys: membership.organization.modules.map((moduleItem) => moduleItem.moduleKey),
     };
   }
 
@@ -164,6 +170,10 @@ export class AuthorizationService {
             slug: true,
             legalName: true,
             tradeName: true,
+            modules: {
+              where: { enabled: true },
+              select: { moduleKey: true },
+            },
           },
         },
         branchAccess: {
@@ -226,6 +236,9 @@ export class AuthorizationService {
         permissionKeys,
         branchIds: membership.branchAccess.map(
           (branchAccess) => branchAccess.branchId,
+        ),
+        moduleKeys: membership.organization.modules.map(
+          (moduleItem) => moduleItem.moduleKey,
         ),
       };
     });
@@ -332,6 +345,9 @@ export class AuthorizationService {
       ...(platformContext?.permissionKeys ?? []),
       ...memberships.flatMap((membership) => membership.permissionKeys),
     ]);
+    const effectiveOrganizationModuleKeys = new Set(
+      memberships.flatMap((membership) => membership.moduleKeys),
+    );
     const hasPlatformAccess = Boolean(platformContext);
     const hasOrganizationAccess = memberships.length > 0;
 
@@ -342,10 +358,17 @@ export class AuthorizationService {
         }
 
         if (moduleItem.audience === 'ORGANIZATION') {
-          return hasOrganizationAccess;
+          return (
+            hasOrganizationAccess &&
+            effectiveOrganizationModuleKeys.has(moduleItem.key)
+          );
         }
 
-        return hasPlatformAccess || hasOrganizationAccess;
+        return (
+          hasPlatformAccess ||
+          (hasOrganizationAccess &&
+            effectiveOrganizationModuleKeys.has(moduleItem.key))
+        );
       })
       .map((moduleItem) => ({
         ...moduleItem,

@@ -285,11 +285,11 @@ export default function PlatformRolesPage() {
       <AdminPageHeader
         eyebrow="Superadmin"
         title="Roles base de Kapos"
-        description="Aqui editas las plantillas maestras que luego gobiernan plataforma, organizaciones, owners y delegaciones internas."
+        description="Aqui editas roles reales del sistema: plataforma, owners, administradores y roles delegables a organizaciones."
       />
 
       <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Roles base" value={String(roles.length)} hint="Plantillas reales activas dentro del sistema." tone="dark" />
+        <StatCard label="Roles base" value={String(roles.length)} hint="Roles activos dentro del sistema." tone="dark" />
         <StatCard label="Roles platform" value={String(roles.filter((role) => role.context === "PLATFORM").length)} hint="Gobierno maestro de Kapos." tone="accent" />
         <StatCard label="Roles organization" value={String(roles.filter((role) => role.context === "ORGANIZATION").length)} hint="Delegables a clientes y sus equipos." />
       </div>
@@ -312,7 +312,7 @@ export default function PlatformRolesPage() {
             permissionKeys={platformContext?.permissionKeys ?? []}
             searchPlaceholder="Buscar por rol, key, contexto o permiso..."
             emptyTitle="No hay roles base"
-            emptyDescription="Debes mantener al menos las plantillas maestras del sistema para que las memberships y accesos se deleguen bien."
+            emptyDescription="Debes mantener roles base para que las memberships y accesos se deleguen bien."
             columns={[
               {
                 key: "rol",
@@ -506,7 +506,7 @@ export default function PlatformRolesPage() {
         onClose={() => setSelectedRole(null)}
         eyebrow="Rol base"
         title={selectedRole?.name ?? "Detalle de rol"}
-        description="Este panel te permite revisar o ajustar los permisos que sostienen una plantilla maestra del sistema."
+        description="Este panel te permite revisar o ajustar los permisos que sostienen este rol del sistema."
         footer={
           <div className="flex justify-end gap-3">
             <AdminActionButton tone="ghost" onClick={() => setSelectedRole(null)}>
