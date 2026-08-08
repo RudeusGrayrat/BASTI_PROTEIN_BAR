@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   AdminActionButton,
+  ArrowLeftIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
@@ -29,7 +30,6 @@ import type { ProductCategorySummary } from "../../../types/erp";
 
 type CategoryForm = {
   name: string;
-  slug: string;
   description: string;
   color: string;
   sortOrder: string;
@@ -38,16 +38,11 @@ type CategoryForm = {
 
 const EMPTY_FORM: CategoryForm = {
   name: "",
-  slug: "",
   description: "",
   color: "#b4e610",
   sortOrder: "0",
   isActive: true,
 };
-
-function createSlug(value: string) {
-  return value.trim().toLowerCase().replaceAll(" ", "-");
-}
 
 export default function CatalogoCategoriasPage() {
   const {
@@ -59,6 +54,7 @@ export default function CatalogoCategoriasPage() {
   const [categories, setCategories] = useState<ProductCategorySummary[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "create">("table");
   const [form, setForm] = useState<CategoryForm>(EMPTY_FORM);
   const [selectedCategory, setSelectedCategory] =
     useState<ProductCategorySummary | null>(null);
@@ -95,7 +91,6 @@ export default function CatalogoCategoriasPage() {
         organizationId: activeOrganizationId,
         body: {
           name: form.name,
-          slug: form.slug || createSlug(form.name),
           description: form.description || undefined,
           color: form.color,
           sortOrder: Number(form.sortOrder || "0"),
@@ -104,6 +99,7 @@ export default function CatalogoCategoriasPage() {
       });
       setForm(EMPTY_FORM);
       setReloadKey((current) => current + 1);
+      setViewMode("table");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "No se pudo crear la categoria.");
     }
@@ -113,7 +109,6 @@ export default function CatalogoCategoriasPage() {
     setSelectedCategory(category);
     setEditForm({
       name: category.name,
-      slug: category.slug,
       description: category.description ?? "",
       color: category.color ?? "#b4e610",
       sortOrder: String(category.sortOrder),
@@ -133,7 +128,6 @@ export default function CatalogoCategoriasPage() {
         categoryId: selectedCategory.id,
         body: {
           name: editForm.name,
-          slug: editForm.slug || createSlug(editForm.name),
           description: editForm.description || undefined,
           color: editForm.color,
           sortOrder: Number(editForm.sortOrder || "0"),
@@ -167,22 +161,38 @@ export default function CatalogoCategoriasPage() {
 
   return (
     <section className="space-y-8">
-      <AdminPageHeader eyebrow="Catalogo" title="Categorias" description="Orden visual y operativo para productos, POS y reportes." />
+      <AdminPageHeader
+        eyebrow="Catalogo"
+        title="Categorias"
+        description="Orden visual y operativo para productos, POS y reportes."
+        action={
+          <div className="flex gap-3">
+            {viewMode === "create" ? (
+              <AdminActionButton onClick={() => setViewMode("table")} icon={<ArrowLeftIcon />} tone="ghost">
+                Volver a la tabla
+              </AdminActionButton>
+            ) : null}
+            <AdminActionButton onClick={() => setViewMode("create")} icon={<PlusIcon />} tone="primary" active={viewMode === "create"}>
+              Crear categoria
+            </AdminActionButton>
+          </div>
+        }
+      />
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Categorias" value={String(categories.length)} hint="Familias creadas." tone="dark" />
         <StatCard label="Activas" value={String(categories.filter((category) => category.isActive).length)} hint="Visibles para operar." tone="accent" />
         <StatCard label="Productos" value={String(categories.reduce((sum, category) => sum + (category._count?.products ?? 0), 0))} hint="Productos clasificados." />
       </div>
       {error ? <AdminMessage title="No pudimos completar la accion" description={error} tone="warn" /> : null}
-      <div className="grid gap-5 xl:grid-cols-[0.7fr_1.3fr]">
+      {viewMode === "create" ? (
         <PanelCard title="Crear categoria" description="Ejemplos: waffles, batidos, toppings, bebidas.">
           <form className="space-y-4" onSubmit={handleSubmit}>
             <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Nombre</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} required /></label>
-            <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Slug</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm lowercase outline-none transition focus:border-[#a9cf24]" value={form.slug} placeholder="batidos" onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value.toLowerCase() }))} /></label>
             <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Descripcion</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} /></label>
             <div className="flex justify-end"><AdminActionButton type="submit" tone="primary" icon={<PlusIcon />}>Crear categoria</AdminActionButton></div>
           </form>
         </PanelCard>
+      ) : (
         <PanelCard title="Tabla de categorias" description="Listado real para organizar productos.">
           <AdminDataTable
             fetchData={fetchCategories}
@@ -199,13 +209,13 @@ export default function CatalogoCategoriasPage() {
               { key: "status", label: "Estado", render: (row) => <Tag tone={row.isActive ? "accent" : "soft"}>{row.isActive ? "Activa" : "Inactiva"}</Tag> },
             ]}
             actions={[
-              { label: "Editar", permission: "catalog.categories.manage", icon: <PencilIcon />, onClick: openCategoryEditor },
-              { label: "Activar", permission: "catalog.categories.manage", tone: "accent", icon: <PlusIcon />, visible: (row) => !row.isActive, onClick: toggleCategoryStatus },
-              { label: "Desactivar", permission: "catalog.categories.manage", tone: "warn", icon: <TrashIcon />, visible: (row) => row.isActive, onClick: toggleCategoryStatus },
+              { label: "Editar", permission: "catalog.categories.update", icon: <PencilIcon />, onClick: openCategoryEditor },
+              { label: "Activar", permission: "catalog.categories.activate", tone: "accent", icon: <PlusIcon />, visible: (row) => !row.isActive, onClick: toggleCategoryStatus },
+              { label: "Desactivar", permission: "catalog.categories.update", tone: "warn", icon: <TrashIcon />, visible: (row) => row.isActive, onClick: toggleCategoryStatus },
             ]}
           />
         </PanelCard>
-      </div>
+      )}
 
       <AdminOverlayPanel
         open={Boolean(selectedCategory)}
@@ -223,7 +233,6 @@ export default function CatalogoCategoriasPage() {
         {editForm ? (
           <form id="category-edit-form" className="grid gap-4 md:grid-cols-2" onSubmit={handleUpdateCategory}>
             <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Nombre</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={editForm.name} onChange={(event) => setEditForm((current) => current ? { ...current, name: event.target.value } : current)} required /></label>
-            <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Slug</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm lowercase outline-none transition focus:border-[#a9cf24]" value={editForm.slug} onChange={(event) => setEditForm((current) => current ? { ...current, slug: event.target.value.toLowerCase() } : current)} /></label>
             <label className="space-y-2 md:col-span-2"><span className="text-sm font-semibold text-[#21300f]">Descripcion</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={editForm.description} onChange={(event) => setEditForm((current) => current ? { ...current, description: event.target.value } : current)} /></label>
             <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Orden</span><input type="number" className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={editForm.sortOrder} onChange={(event) => setEditForm((current) => current ? { ...current, sortOrder: event.target.value } : current)} /></label>
             <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Estado</span><select className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={editForm.isActive ? "ACTIVE" : "INACTIVE"} onChange={(event) => setEditForm((current) => current ? { ...current, isActive: event.target.value === "ACTIVE" } : current)}><option value="ACTIVE">Activa</option><option value="INACTIVE">Inactiva</option></select></label>

@@ -28,7 +28,7 @@ export class SettingsController {
   }
 
   @Patch('organization')
-  @RequirePermissions('settings.organization.manage')
+  @RequirePermissions('settings.organization.update')
   updateOrganization(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Body() input: UpdateOrganizationProfileDto,
@@ -48,7 +48,7 @@ export class SettingsController {
   }
 
   @Post('branches')
-  @RequirePermissions('settings.branches.manage')
+  @RequirePermissions('settings.branches.create')
   createBranch(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Body() input: CreateBranchDto,
@@ -60,7 +60,7 @@ export class SettingsController {
   }
 
   @Patch('branches/:id')
-  @RequirePermissions('settings.branches.manage')
+  @RequirePermissions('settings.branches.update')
   updateBranch(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Param('id') id: string,
@@ -84,7 +84,7 @@ export class SettingsController {
   }
 
   @Post('payment-methods')
-  @RequirePermissions('settings.parameters.manage')
+  @RequirePermissions('settings.parameters.create')
   createPaymentMethod(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Body() input: CreatePaymentMethodDto,
@@ -96,7 +96,7 @@ export class SettingsController {
   }
 
   @Patch('payment-methods/:id')
-  @RequirePermissions('settings.parameters.manage')
+  @RequirePermissions('settings.parameters.update')
   updatePaymentMethod(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Param('id') id: string,

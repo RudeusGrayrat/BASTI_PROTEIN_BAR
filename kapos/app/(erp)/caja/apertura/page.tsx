@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   AdminActionButton,
+  ArrowLeftIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
@@ -46,6 +47,7 @@ export default function CajaAperturaPage() {
   const [openSessions, setOpenSessions] = useState<CashSessionSummary[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "create-register" | "open-session">("table");
   const [registerForm, setRegisterForm] = useState({
     branchId: "",
     code: "",
@@ -124,6 +126,7 @@ export default function CajaAperturaPage() {
       });
       setRegisterForm({ branchId: "", code: "", name: "", sortOrder: "0" });
       setReloadKey((current) => current + 1);
+      setViewMode("table");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "No se pudo crear la caja.");
     }
@@ -152,6 +155,7 @@ export default function CajaAperturaPage() {
         openingNote: "",
       });
       setReloadKey((current) => current + 1);
+      setViewMode("table");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "No se pudo abrir la caja.");
     }
@@ -222,6 +226,21 @@ export default function CajaAperturaPage() {
         eyebrow="Caja"
         title="Apertura"
         description="Crea cajas por sucursal y abre el turno antes de vender. Una caja solo puede tener una sesion abierta."
+        action={
+          <div className="flex gap-3">
+            {viewMode !== "table" ? (
+              <AdminActionButton onClick={() => setViewMode("table")} icon={<ArrowLeftIcon />} tone="ghost">
+                Volver a la tabla
+              </AdminActionButton>
+            ) : null}
+            <AdminActionButton onClick={() => setViewMode("create-register")} icon={<PlusIcon />} tone="secondary" active={viewMode === "create-register"}>
+              Crear caja
+            </AdminActionButton>
+            <AdminActionButton onClick={() => setViewMode("open-session")} icon={<PlusIcon />} tone="primary" active={viewMode === "open-session"}>
+              Abrir caja
+            </AdminActionButton>
+          </div>
+        }
       />
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Cajas" value={String(registers.length)} hint="Cajas configuradas." tone="dark" />
@@ -229,8 +248,7 @@ export default function CajaAperturaPage() {
         <StatCard label="Sucursales" value={String(branches.length)} hint="Sedes activas." />
       </div>
       {error ? <AdminMessage title="No pudimos completar la accion" description={error} tone="warn" /> : null}
-      <div className="grid gap-5 xl:grid-cols-[0.68fr_1.32fr]">
-        <div className="space-y-5">
+      {viewMode === "create-register" ? (
           <PanelCard title="Crear caja" description="Caja fisica o logica dentro de una sucursal.">
             <form className="space-y-4" onSubmit={handleCreateRegister}>
               <label className="space-y-2">
@@ -246,6 +264,7 @@ export default function CajaAperturaPage() {
               <div className="flex justify-end"><AdminActionButton type="submit" tone="primary" icon={<PlusIcon />}>Crear caja</AdminActionButton></div>
             </form>
           </PanelCard>
+      ) : viewMode === "open-session" ? (
           <PanelCard title="Abrir caja" description="Registra el monto inicial del turno.">
             <form className="space-y-4" onSubmit={handleOpenSession}>
               <label className="space-y-2">
@@ -267,7 +286,7 @@ export default function CajaAperturaPage() {
               <div className="flex justify-end"><AdminActionButton type="submit" tone="primary" icon={<PlusIcon />}>Abrir caja</AdminActionButton></div>
             </form>
           </PanelCard>
-        </div>
+      ) : (
         <PanelCard title="Cajas registradas" description="Administra cajas sin eliminarlas fisicamente.">
           <AdminDataTable
             fetchData={fetchRegisters}
@@ -284,12 +303,13 @@ export default function CajaAperturaPage() {
               { key: "status", label: "Estado", render: (row) => <Tag tone={row.status === "ACTIVE" ? "accent" : "soft"}>{row.status}</Tag> },
             ]}
             actions={[
-              { label: "Editar", permission: "cash.openings.manage", icon: <PencilIcon />, onClick: openRegisterEditor },
-              { label: "Desactivar", permission: "cash.openings.manage", tone: "warn", icon: <TrashIcon />, active: (row) => row.status !== "ACTIVE", onClick: toggleRegisterStatus },
+              { label: "Editar", permission: "cash.openings.update", icon: <PencilIcon />, onClick: openRegisterEditor },
+              { label: "Activar", permission: "cash.openings.activate", tone: "accent", icon: <PlusIcon />, visible: (row) => row.status !== "ACTIVE", onClick: toggleRegisterStatus },
+              { label: "Desactivar", permission: "cash.openings.update", tone: "warn", icon: <TrashIcon />, visible: (row) => row.status === "ACTIVE", onClick: toggleRegisterStatus },
             ]}
           />
         </PanelCard>
-      </div>
+      )}
 
       <AdminOverlayPanel
         open={Boolean(selectedRegister)}

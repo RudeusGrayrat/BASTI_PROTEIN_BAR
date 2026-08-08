@@ -36,7 +36,7 @@ export class CashController {
   }
 
   @Post('registers')
-  @RequirePermissions('cash.openings.manage')
+  @RequirePermissions('cash.openings.create')
   createRegister(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Body() input: CreateCashRegisterDto,
@@ -48,7 +48,7 @@ export class CashController {
   }
 
   @Patch('registers/:id')
-  @RequirePermissions('cash.openings.manage')
+  @RequirePermissions('cash.openings.update')
   updateRegister(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Param('id') id: string,
@@ -92,7 +92,7 @@ export class CashController {
   }
 
   @Post('sessions/open')
-  @RequirePermissions('cash.openings.manage')
+  @RequirePermissions('cash.openings.create')
   openSession(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @CurrentUser() user: { userId: string },
@@ -118,7 +118,7 @@ export class CashController {
   }
 
   @Post('sessions/:id/movements')
-  @RequirePermissions('cash.movements.manage')
+  @RequirePermissions('cash.movements.create')
   createMovement(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @CurrentUser() user: { userId: string },
@@ -134,7 +134,7 @@ export class CashController {
   }
 
   @Post('sessions/:id/close')
-  @RequirePermissions('cash.closings.manage')
+  @RequirePermissions('cash.closings.create')
   closeSession(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @CurrentUser() user: { userId: string },

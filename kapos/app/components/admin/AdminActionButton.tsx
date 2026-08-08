@@ -3,11 +3,13 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import {
   ArrowLeft,
+  Check,
   Eye,
   Pencil,
   Plus,
   Sparkles,
   Trash2,
+  UserPlus,
   X,
 } from "lucide-react";
 
@@ -119,4 +121,12 @@ export function CloseIcon(props: IconProps) {
 
 export function SparkIcon(props: IconProps) {
   return <Sparkles className={joinClasses("h-4 w-4", props.className)} aria-hidden="true" />;
+}
+
+export function CheckIcon(props: IconProps) {
+  return <Check className={joinClasses("h-4 w-4", props.className)} aria-hidden="true" />;
+}
+
+export function UserPlusIcon(props: IconProps) {
+  return <UserPlus className={joinClasses("h-4 w-4", props.className)} aria-hidden="true" />;
 }

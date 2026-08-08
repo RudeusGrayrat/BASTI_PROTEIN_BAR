@@ -24,12 +24,15 @@ export class CreatePlatformOrganizationDto {
   @MaxLength(160)
   tradeName?: string;
 
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
+  @IsOptional()
   @IsString()
   @MinLength(3)
   @MaxLength(50)
   @Matches(/^[a-z0-9-]+$/)
-  slug!: string;
+  slug?: string;
 
   @Transform(({ value }) => normalizeOptionalText(value))
   @IsOptional()

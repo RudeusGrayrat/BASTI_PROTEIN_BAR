@@ -3,12 +3,15 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   AdminActionButton,
+  CheckIcon,
   EyeIcon,
   PencilIcon,
   SparkIcon,
   TrashIcon,
+  UserPlusIcon,
 } from "./AdminActionButton";
 import { HoverTooltip } from "../ui/HoverTooltip";
+import { useToast } from "../../context/toast-context";
 
 type AdminTableAction<T> = {
   label: string;
@@ -79,6 +82,21 @@ function getActionIcon(label: string) {
     return <TrashIcon />;
   }
 
+  if (
+    normalizedLabel.includes("aprobar") ||
+    normalizedLabel.includes("activar") ||
+    normalizedLabel.includes("reactivar")
+  ) {
+    return <CheckIcon />;
+  }
+
+  if (
+    normalizedLabel.includes("asignar") ||
+    normalizedLabel.includes("vincular")
+  ) {
+    return <UserPlusIcon />;
+  }
+
   return <SparkIcon />;
 }
 
@@ -136,6 +154,7 @@ export function AdminDataTable<T>({
   emptyTitle,
   emptyDescription,
 }: AdminDataTableProps<T>) {
+  const toast = useToast();
   const fetchDataRef = useRef(fetchData);
   const onDataLoadedRef = useRef(onDataLoaded);
   const [internalRows, setInternalRows] = useState<T[]>(rows ?? []);
@@ -205,6 +224,7 @@ export function AdminDataTable<T>({
               ? error.message
               : "No se pudo cargar la tabla.",
           );
+          toast.showError(error, "No se pudo cargar la tabla");
           setInternalRows([]);
           setInternalTotal(0);
         }
@@ -220,7 +240,7 @@ export function AdminDataTable<T>({
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearch, internalLimit, internalPage, reloadKey]);
+  }, [debouncedSearch, internalLimit, internalPage, reloadKey, toast]);
 
   const tableRows = fetchData ? internalRows : rows ?? [];
   const tableTotal = fetchData ? internalTotal : total ?? tableRows.length;

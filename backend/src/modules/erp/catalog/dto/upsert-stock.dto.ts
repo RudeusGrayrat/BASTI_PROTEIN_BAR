@@ -1,4 +1,5 @@
-import { IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpsertStockDto {
   @IsString()
@@ -7,7 +8,12 @@ export class UpsertStockDto {
   @IsString()
   branchId!: string;
 
+  @Type(() => Number)
+  @IsNumber()
   quantity!: number;
 
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   minQuantity?: number;
 }

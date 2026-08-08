@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   AdminActionButton,
+  ArrowLeftIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
@@ -16,6 +17,10 @@ import {
   Tag,
 } from "../../../components/admin/AdminBlocks";
 import { AdminOverlayPanel } from "../../../components/admin/AdminOverlayPanel";
+import {
+  AdminPermissionMatrix,
+  buildPermissionMatrixRows,
+} from "../../../components/admin/AdminPermissionMatrix";
 import { useAuth } from "../../../context/auth-context";
 import {
   archiveInternalRole,
@@ -38,17 +43,6 @@ type RoleForm = {
 
 function emptyRoleForm(): RoleForm {
   return { key: "", name: "", description: "", permissionKeys: [] };
-}
-
-function groupPermissions(permissions: OrganizationPermissionSummary[]) {
-  return permissions.reduce<Record<string, OrganizationPermissionSummary[]>>(
-    (groups, permission) => {
-      const label = `${permission.moduleKey ?? "general"} / ${permission.submoduleKey ?? "general"}`;
-      groups[label] = [...(groups[label] ?? []), permission];
-      return groups;
-    },
-    {},
-  );
 }
 
 export default function ConfigRolesPage() {
@@ -181,30 +175,18 @@ export default function ConfigRolesPage() {
     }
   }
 
-  const permissionGroups = groupPermissions(permissions);
+  const permissionRows = buildPermissionMatrixRows([], permissions);
 
   function renderPermissionSelector(target: "create" | "edit", values: string[]) {
     return (
-      <div className="space-y-4">
-        {Object.entries(permissionGroups).map(([group, items]) => (
-          <div key={group} className="rounded-[24px] border border-[#edf1e4] bg-white/80 p-4">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#7a8b45]">{group}</p>
-            <div className="flex flex-wrap gap-2">
-              {items.map((permission) => (
-                <AdminActionButton
-                  key={permission.key}
-                  size="sm"
-                  tone="secondary"
-                  active={values.includes(permission.key)}
-                  onClick={() => togglePermission(target, permission.key)}
-                >
-                  {permission.name}
-                </AdminActionButton>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      <AdminPermissionMatrix
+        rows={permissionRows}
+        selectedPermissionKeys={values}
+        minHeightClassName="min-h-64"
+        emptyTitle="Sin permisos delegables"
+        emptyDescription="Tu usuario aun no tiene permisos disponibles para delegar en roles."
+        onToggle={(permissionKey) => togglePermission(target, permissionKey)}
+      />
     );
   }
 
@@ -216,7 +198,11 @@ export default function ConfigRolesPage() {
         description="Crea roles personalizados para la organizacion activa sin delegar permisos superiores a los tuyos."
         action={
           <div className="flex gap-2">
-            <AdminActionButton tone="secondary" active={mode === "table"} onClick={() => setMode("table")}>Tabla</AdminActionButton>
+            {mode === "create" ? (
+              <AdminActionButton tone="ghost" icon={<ArrowLeftIcon />} onClick={() => setMode("table")}>
+                Volver a la tabla
+              </AdminActionButton>
+            ) : null}
             <AdminActionButton tone="primary" active={mode === "create"} icon={<PlusIcon />} onClick={() => setMode("create")}>Crear rol</AdminActionButton>
           </div>
         }
@@ -260,8 +246,8 @@ export default function ConfigRolesPage() {
               { key: "members", label: "Usuarios", align: "center", render: (row) => row.memberCount },
             ]}
             actions={[
-              { label: "Editar", permission: "settings.roles.manage_permissions", icon: <PencilIcon />, disabled: false, onClick: openEditor },
-              { label: "Archivar", permission: "settings.roles.manage_permissions", tone: "warn", icon: <TrashIcon />, onClick: handleArchive },
+              { label: "Editar", permission: "settings.roles.update", icon: <PencilIcon />, disabled: false, onClick: openEditor },
+              { label: "Archivar", permission: "settings.roles.delete", tone: "warn", icon: <TrashIcon />, onClick: handleArchive },
             ]}
           />
         </PanelCard>

@@ -193,7 +193,7 @@ export class ErpAccessController {
 
   @Patch('organization/users/:membershipId')
   @UseGuards(OrganizationContextGuard, PermissionsGuard)
-  @RequirePermissions('settings.users.assign_roles')
+  @RequirePermissions('settings.users.update')
   updateOrganizationUser(
     @OrganizationContext()
     organizationContext: {
@@ -213,7 +213,7 @@ export class ErpAccessController {
 
   @Post('organization/users/:membershipId/suspend')
   @UseGuards(OrganizationContextGuard, PermissionsGuard)
-  @RequirePermissions('settings.users.assign_roles')
+  @RequirePermissions('settings.users.update')
   suspendOrganizationUser(
     @OrganizationContext()
     organizationContext: {
@@ -230,7 +230,7 @@ export class ErpAccessController {
 
   @Post('organization/users/:membershipId/reactivate')
   @UseGuards(OrganizationContextGuard, PermissionsGuard)
-  @RequirePermissions('settings.users.assign_roles')
+  @RequirePermissions('settings.users.activate')
   reactivateOrganizationUser(
     @OrganizationContext()
     organizationContext: {
@@ -301,7 +301,7 @@ export class ErpAccessController {
 
   @Patch('organization/roles/:roleId')
   @UseGuards(OrganizationContextGuard, PermissionsGuard)
-  @RequirePermissions('settings.roles.manage_permissions')
+  @RequirePermissions('settings.roles.update')
   updateInternalRole(
     @OrganizationContext()
     organizationContext: {
@@ -321,7 +321,7 @@ export class ErpAccessController {
 
   @Post('organization/roles/:roleId/archive')
   @UseGuards(OrganizationContextGuard, PermissionsGuard)
-  @RequirePermissions('settings.roles.manage_permissions')
+  @RequirePermissions('settings.roles.delete')
   archiveInternalRole(
     @OrganizationContext()
     organizationContext: {
@@ -411,7 +411,7 @@ export class ErpAccessController {
 
   @Patch('platform/organizations/:id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.organizations.manage')
+  @RequirePermissions('platform.organizations.update')
   updatePlatformOrganization(
     @Param('id') id: string,
     @Body() input: UpdatePlatformOrganizationDto,
@@ -428,7 +428,7 @@ export class ErpAccessController {
 
   @Patch('platform/users/:id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.users.manage')
+  @RequirePermissions('platform.users.update')
   updatePlatformUser(
     @Param('id') id: string,
     @Body() input: UpdatePlatformUserDto,
@@ -438,7 +438,7 @@ export class ErpAccessController {
 
   @Post('platform/users/:id/memberships')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.memberships.manage')
+  @RequirePermissions('platform.memberships.update')
   assignPlatformMembership(
     @Param('id') id: string,
     @Body() input: AssignPlatformMembershipDto,
@@ -448,7 +448,7 @@ export class ErpAccessController {
 
   @Patch('platform/users/:id/platform-permissions')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.users.manage')
+  @RequirePermissions('platform.users.update')
   updatePlatformPermissionOverrides(
     @Param('id') id: string,
     @Body() input: UpdatePermissionOverridesDto,
@@ -458,7 +458,7 @@ export class ErpAccessController {
 
   @Patch('platform/users/:id/memberships/:membershipId/permissions')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.memberships.manage')
+  @RequirePermissions('platform.memberships.update')
   updateMembershipPermissionOverrides(
     @Param('id') id: string,
     @Param('membershipId') membershipId: string,
@@ -473,7 +473,7 @@ export class ErpAccessController {
 
   @Delete('platform/users/:id/memberships/:membershipId')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.memberships.manage')
+  @RequirePermissions('platform.memberships.delete')
   unlinkPlatformMembership(
     @Param('id') id: string,
     @Param('membershipId') membershipId: string,
@@ -483,14 +483,14 @@ export class ErpAccessController {
 
   @Post('platform/modules')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.modules.manage')
+  @RequirePermissions('platform.modules.create')
   createPlatformModule(@Body() input: CreatePlatformModuleDto) {
     return this.platformAdminService.createModule(input);
   }
 
   @Patch('platform/modules/:id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.modules.manage')
+  @RequirePermissions('platform.modules.update')
   updatePlatformModule(
     @Param('id') id: string,
     @Body() input: UpdatePlatformModuleDto,
@@ -500,14 +500,14 @@ export class ErpAccessController {
 
   @Post('platform/submodules')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.modules.manage')
+  @RequirePermissions('platform.modules.create')
   createPlatformSubmodule(@Body() input: CreatePlatformSubmoduleDto) {
     return this.platformAdminService.createSubmodule(input);
   }
 
   @Patch('platform/submodules/:id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.modules.manage')
+  @RequirePermissions('platform.modules.update')
   updatePlatformSubmodule(
     @Param('id') id: string,
     @Body() input: UpdatePlatformSubmoduleDto,
@@ -517,14 +517,14 @@ export class ErpAccessController {
 
   @Post('platform/permissions')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.permissions.manage')
+  @RequirePermissions('platform.permissions.create')
   createPlatformPermission(@Body() input: CreatePlatformPermissionDto) {
     return this.platformAdminService.createPermission(input);
   }
 
   @Patch('platform/permissions/:id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.permissions.manage')
+  @RequirePermissions('platform.permissions.update')
   updatePlatformPermission(
     @Param('id') id: string,
     @Body() input: UpdatePlatformPermissionDto,
@@ -534,7 +534,7 @@ export class ErpAccessController {
 
   @Patch('platform/roles/:id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.roles.manage')
+  @RequirePermissions('platform.roles.update')
   updatePlatformRole(
     @Param('id') id: string,
     @Body() input: UpdatePlatformRoleDto,
@@ -544,7 +544,7 @@ export class ErpAccessController {
 
   @Post('platform/organizations/:id/roles')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.roles.manage')
+  @RequirePermissions('platform.roles.create')
   createOrganizationRole(
     @Param('id') id: string,
     @Body() input: CreateOrganizationRoleDto,
@@ -554,7 +554,7 @@ export class ErpAccessController {
 
   @Patch('platform/organizations/:id/roles/:roleId')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions('platform.roles.manage')
+  @RequirePermissions('platform.roles.update')
   updateOrganizationRole(
     @Param('id') id: string,
     @Param('roleId') roleId: string,

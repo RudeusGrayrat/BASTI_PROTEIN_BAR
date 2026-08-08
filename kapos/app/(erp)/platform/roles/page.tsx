@@ -348,7 +348,7 @@ export default function PlatformRolesPage() {
             ]}
             actions={[
               { label: "Ver detalle", icon: <EyeIcon />, onClick: (role) => openRoleDetail(role) },
-              { label: "Editar", permission: "platform.roles.manage", icon: <PencilIcon />, onClick: (role) => openRoleEditor(role) },
+              { label: "Editar", permission: "platform.roles.update", icon: <PencilIcon />, onClick: (role) => openRoleEditor(role) },
             ]}
           />
         )}

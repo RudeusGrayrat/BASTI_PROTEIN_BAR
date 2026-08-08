@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AdminActionButton, PencilIcon, PlusIcon, TrashIcon } from "../../../components/admin/AdminActionButton";
+import { AdminActionButton, ArrowLeftIcon, PencilIcon, PlusIcon, TrashIcon } from "../../../components/admin/AdminActionButton";
 import { AdminDataTable, createLocalAdminTableFetch } from "../../../components/admin/AdminDataTable";
 import { AdminMessage, AdminPageHeader, PanelCard, StatCard, Tag } from "../../../components/admin/AdminBlocks";
 import { AdminOverlayPanel } from "../../../components/admin/AdminOverlayPanel";
@@ -15,6 +15,7 @@ export default function ConfigSucursalesPage() {
   const [reloadKey, setReloadKey] = useState(0);
   const [form, setForm] = useState({ code: "", name: "", address: "", phone: "" });
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "create">("table");
   const [selectedBranch, setSelectedBranch] = useState<BranchSummary | null>(null);
   const [editForm, setEditForm] = useState({
     code: "",
@@ -50,6 +51,7 @@ export default function ConfigSucursalesPage() {
       await createBranch({ accessToken: token, organizationId: activeOrganizationId, body: form });
       setForm({ code: "", name: "", address: "", phone: "" });
       setReloadKey((current) => current + 1);
+      setViewMode("table");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "No se pudo crear la sucursal.");
     }
@@ -104,14 +106,30 @@ export default function ConfigSucursalesPage() {
 
   return (
     <section className="space-y-8">
-      <AdminPageHeader eyebrow="Configuracion" title="Sucursales" description="Sedes donde operaran caja, stock, POS y reportes." />
+      <AdminPageHeader
+        eyebrow="Configuracion"
+        title="Sucursales"
+        description="Sedes donde operaran caja, stock, POS y reportes."
+        action={
+          <div className="flex gap-3">
+            {viewMode === "create" ? (
+              <AdminActionButton onClick={() => setViewMode("table")} icon={<ArrowLeftIcon />} tone="ghost">
+                Volver a la tabla
+              </AdminActionButton>
+            ) : null}
+            <AdminActionButton onClick={() => setViewMode("create")} icon={<PlusIcon />} tone="primary" active={viewMode === "create"}>
+              Crear sucursal
+            </AdminActionButton>
+          </div>
+        }
+      />
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Organizacion" value={activeOrganization?.organizationName ?? "..."} hint="Contexto activo." tone="dark" />
         <StatCard label="Sucursales" value={String(branches.length)} hint="Sedes configuradas." tone="accent" />
         <StatCard label="Activas" value={String(branches.filter((branch) => branch.status === "ACTIVE").length)} hint="Disponibles para operar." />
       </div>
       {error ? <AdminMessage title="No pudimos crear la sucursal" description={error} tone="warn" /> : null}
-      <div className="grid gap-5 xl:grid-cols-[0.7fr_1.3fr]">
+      {viewMode === "create" ? (
         <PanelCard title="Crear sucursal" description="Alta rapida de sede para comenzar a operar caja y stock.">
           <form className="space-y-4" onSubmit={handleSubmit}>
             {[
@@ -130,6 +148,7 @@ export default function ConfigSucursalesPage() {
             </div>
           </form>
         </PanelCard>
+      ) : (
         <PanelCard title="Tabla de sucursales" description="Listado real de sedes de la organizacion activa.">
           <AdminDataTable
             fetchData={fetchBranches}
@@ -146,13 +165,13 @@ export default function ConfigSucursalesPage() {
               { key: "status", label: "Estado", render: (row) => <Tag tone={row.status === "ACTIVE" ? "accent" : "soft"}>{row.status}</Tag> },
             ]}
             actions={[
-              { label: "Editar", permission: "settings.branches.manage", icon: <PencilIcon />, onClick: openBranchEditor },
-              { label: "Activar", permission: "settings.branches.manage", tone: "accent", icon: <PlusIcon />, visible: (row) => row.status !== "ACTIVE", onClick: toggleBranchStatus },
-              { label: "Desactivar", permission: "settings.branches.manage", tone: "warn", icon: <TrashIcon />, visible: (row) => row.status === "ACTIVE", onClick: toggleBranchStatus },
+              { label: "Editar", permission: "settings.branches.update", icon: <PencilIcon />, onClick: openBranchEditor },
+              { label: "Activar", permission: "settings.branches.activate", tone: "accent", icon: <PlusIcon />, visible: (row) => row.status !== "ACTIVE", onClick: toggleBranchStatus },
+              { label: "Desactivar", permission: "settings.branches.update", tone: "warn", icon: <TrashIcon />, visible: (row) => row.status === "ACTIVE", onClick: toggleBranchStatus },
             ]}
           />
         </PanelCard>
-      </div>
+      )}
 
       <AdminOverlayPanel
         open={Boolean(selectedBranch)}

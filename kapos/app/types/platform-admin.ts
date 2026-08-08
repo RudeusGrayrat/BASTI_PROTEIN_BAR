@@ -173,7 +173,7 @@ export type PlatformModuleSummary = {
 export type CreatePlatformOrganizationInput = {
   legalName: string;
   tradeName?: string;
-  slug: string;
+  slug?: string;
   documentNumber?: string;
   email?: string;
   phone?: string;

@@ -755,13 +755,7 @@ export default function PlatformModulesPage() {
                   },
                   {
                     label: "Editar",
-                    permission: "platform.modules.manage",
-                    onClick: (row) => openModuleEditor(row),
-                  },
-                  {
-                    label: "Aprobar",
-                    permission: "platform.modules.manage",
-                    tone: "accent",
+                    permission: "platform.modules.update",
                     onClick: (row) => openModuleEditor(row),
                   },
                 ]}
@@ -813,12 +807,12 @@ export default function PlatformModulesPage() {
                   },
                   {
                     label: "Editar",
-                    permission: "platform.modules.manage",
+                    permission: "platform.modules.update",
                     onClick: (row) => openSubmoduleEditor(row),
                   },
                   {
                     label: "Mover",
-                    permission: "platform.modules.manage",
+                    permission: "platform.modules.update",
                     onClick: (row) => openSubmoduleEditor(row),
                   },
                 ]}

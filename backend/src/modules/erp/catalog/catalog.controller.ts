@@ -26,7 +26,7 @@ export class CatalogController {
   }
 
   @Post('categories')
-  @RequirePermissions('catalog.categories.manage')
+  @RequirePermissions('catalog.categories.create')
   createCategory(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Body() input: CreateCategoryDto,
@@ -38,7 +38,7 @@ export class CatalogController {
   }
 
   @Patch('categories/:id')
-  @RequirePermissions('catalog.categories.manage')
+  @RequirePermissions('catalog.categories.update')
   updateCategory(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Param('id') id: string,
@@ -68,7 +68,7 @@ export class CatalogController {
   }
 
   @Post('products')
-  @RequirePermissions('catalog.products.manage')
+  @RequirePermissions('catalog.products.create')
   createProduct(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Body() input: CreateProductDto,
@@ -80,7 +80,7 @@ export class CatalogController {
   }
 
   @Patch('products/:id')
-  @RequirePermissions('catalog.products.manage')
+  @RequirePermissions('catalog.products.update')
   updateProduct(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Param('id') id: string,
@@ -102,7 +102,7 @@ export class CatalogController {
   }
 
   @Post('stock')
-  @RequirePermissions('catalog.adjustments.manage')
+  @RequirePermissions('catalog.adjustments.create')
   upsertStock(
     @OrganizationContext() organizationContext: OrganizationAuthorizationContext,
     @Body() input: UpsertStockDto,

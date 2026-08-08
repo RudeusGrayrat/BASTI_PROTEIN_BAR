@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AdminActionButton, PencilIcon, PlusIcon, TrashIcon } from "../../../components/admin/AdminActionButton";
+import { AdminActionButton, ArrowLeftIcon, PencilIcon, PlusIcon, TrashIcon } from "../../../components/admin/AdminActionButton";
 import { AdminDataTable, createLocalAdminTableFetch } from "../../../components/admin/AdminDataTable";
 import { AdminMessage, AdminPageHeader, PanelCard, StatCard, Tag } from "../../../components/admin/AdminBlocks";
 import { AdminOverlayPanel } from "../../../components/admin/AdminOverlayPanel";
@@ -14,6 +14,7 @@ export default function ConfigParametrosPage() {
   const [methods, setMethods] = useState<PaymentMethodSummary[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "create">("table");
   const [form, setForm] = useState({
     code: "",
     name: "",
@@ -65,6 +66,7 @@ export default function ConfigParametrosPage() {
       });
       setForm({ code: "", name: "", type: "CASH", sortOrder: "0" });
       setReloadKey((current) => current + 1);
+      setViewMode("table");
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "No se pudo crear el metodo de pago.");
     }
@@ -125,14 +127,30 @@ export default function ConfigParametrosPage() {
 
   return (
     <section className="space-y-8">
-      <AdminPageHeader eyebrow="Configuracion" title="Parametros operativos" description="Primeros parametros reales: metodos de pago para caja y POS." />
+      <AdminPageHeader
+        eyebrow="Configuracion"
+        title="Parametros operativos"
+        description="Primeros parametros reales: metodos de pago para caja y POS."
+        action={
+          <div className="flex gap-3">
+            {viewMode === "create" ? (
+              <AdminActionButton onClick={() => setViewMode("table")} icon={<ArrowLeftIcon />} tone="ghost">
+                Volver a la tabla
+              </AdminActionButton>
+            ) : null}
+            <AdminActionButton onClick={() => setViewMode("create")} icon={<PlusIcon />} tone="primary" active={viewMode === "create"}>
+              Crear metodo
+            </AdminActionButton>
+          </div>
+        }
+      />
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Metodos" value={String(methods.length)} hint="Formas de pago configuradas." tone="dark" />
         <StatCard label="Activos" value={String(methods.filter((method) => method.enabled).length)} hint="Disponibles para vender." tone="accent" />
         <StatCard label="Base POS" value="Lista" hint="Caja usara estos metodos." />
       </div>
       {error ? <AdminMessage title="No pudimos guardar" description={error} tone="warn" /> : null}
-      <div className="grid gap-5 xl:grid-cols-[0.7fr_1.3fr]">
+      {viewMode === "create" ? (
         <PanelCard title="Crear metodo de pago" description="Ejemplos: efectivo, tarjeta, Yape, Plin o transferencia.">
           <form className="space-y-4" onSubmit={handleSubmit}>
             <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Codigo</span><input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm lowercase outline-none transition focus:border-[#a9cf24]" placeholder="yape" value={form.code} onChange={(event) => setForm((current) => ({ ...current, code: event.target.value.toLowerCase() }))} required /></label>
@@ -142,6 +160,7 @@ export default function ConfigParametrosPage() {
             <div className="flex justify-end"><AdminActionButton type="submit" tone="primary" icon={<PlusIcon />}>Crear metodo</AdminActionButton></div>
           </form>
         </PanelCard>
+      ) : (
         <PanelCard title="Metodos de pago" description="Listado real disponible para operaciones futuras.">
           <AdminDataTable
             fetchData={fetchPaymentMethods}
@@ -158,13 +177,13 @@ export default function ConfigParametrosPage() {
               { key: "status", label: "Estado", render: (row) => <Tag tone={row.enabled ? "accent" : "soft"}>{row.enabled ? "Activo" : "Inactivo"}</Tag> },
             ]}
             actions={[
-              { label: "Editar", permission: "settings.parameters.manage", icon: <PencilIcon />, onClick: openMethodEditor },
-              { label: "Activar", permission: "settings.parameters.manage", tone: "accent", icon: <PlusIcon />, visible: (row) => !row.enabled, onClick: toggleMethodStatus },
-              { label: "Desactivar", permission: "settings.parameters.manage", tone: "warn", icon: <TrashIcon />, visible: (row) => row.enabled, onClick: toggleMethodStatus },
+              { label: "Editar", permission: "settings.parameters.update", icon: <PencilIcon />, onClick: openMethodEditor },
+              { label: "Activar", permission: "settings.parameters.activate", tone: "accent", icon: <PlusIcon />, visible: (row) => !row.enabled, onClick: toggleMethodStatus },
+              { label: "Desactivar", permission: "settings.parameters.update", tone: "warn", icon: <TrashIcon />, visible: (row) => row.enabled, onClick: toggleMethodStatus },
             ]}
           />
         </PanelCard>
-      </div>
+      )}
 
       <AdminOverlayPanel
         open={Boolean(selectedMethod)}

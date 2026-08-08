@@ -239,7 +239,6 @@ export default function PlatformOrganizationsPage() {
       await createPlatformOrganization(token, {
         legalName: form.legalName,
         tradeName: form.tradeName || undefined,
-        slug: form.slug,
         documentNumber: form.documentNumber || undefined,
         email: form.email || undefined,
         phone: form.phone || undefined,
@@ -297,7 +296,6 @@ export default function PlatformOrganizationsPage() {
       await updatePlatformOrganization(token, selectedOrganization.id, {
         legalName: editForm.legalName,
         tradeName: editForm.tradeName || undefined,
-        slug: editForm.slug,
         documentNumber: editForm.documentNumber || undefined,
         email: editForm.email || undefined,
         phone: editForm.phone || undefined,
@@ -466,13 +464,6 @@ export default function PlatformOrganizationsPage() {
                   <input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" placeholder="Basti" value={form.tradeName} onChange={(event) => setForm((current) => ({ ...current, tradeName: event.target.value }))} />
                 </label>
                 <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[#21300f]">Slug</span>
-                  <input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm lowercase outline-none transition focus:border-[#a9cf24]" placeholder="basti" value={form.slug} onChange={(event) => setForm((current) => ({ ...current, slug: event.target.value.toLowerCase() }))} required />
-                  <p className="text-xs leading-5 text-[#74805f]">
-                    Identificador unico para URLs y referencias internas. Usa minusculas, sin espacios y, si hace falta, guiones.
-                  </p>
-                </label>
-                <label className="space-y-2">
                   <span className="text-sm font-semibold text-[#21300f]">RUC o documento</span>
                   <input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" placeholder="20601234567" value={form.documentNumber} onChange={(event) => setForm((current) => ({ ...current, documentNumber: event.target.value }))} />
                 </label>
@@ -612,12 +603,12 @@ export default function PlatformOrganizationsPage() {
                 },
                 {
                   label: "Editar",
-                  permission: "platform.organizations.manage",
+                  permission: "platform.organizations.update",
                   onClick: (organization) => openOrganizationEditor(organization),
                 },
                 {
                   label: "Suspender",
-                  permission: "platform.organizations.manage",
+                  permission: "platform.organizations.update",
                   tone: "warn",
                   onClick: (organization) => void handleSuspendOrganization(organization),
                 },
@@ -720,10 +711,6 @@ export default function PlatformOrganizationsPage() {
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-[#21300f]">Nombre comercial</span>
                   <input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={editForm.tradeName} onChange={(event) => setEditForm((current) => current ? { ...current, tradeName: event.target.value } : current)} />
-                </label>
-                <label className="space-y-2">
-                  <span className="text-sm font-semibold text-[#21300f]">Slug</span>
-                  <input className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm lowercase outline-none transition focus:border-[#a9cf24]" value={editForm.slug} onChange={(event) => setEditForm((current) => current ? { ...current, slug: event.target.value.toLowerCase() } : current)} required />
                 </label>
                 <label className="space-y-2">
                   <span className="text-sm font-semibold text-[#21300f]">Documento</span>

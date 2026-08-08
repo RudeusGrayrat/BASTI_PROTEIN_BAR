@@ -2,7 +2,12 @@ import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { hash } from 'bcryptjs';
 import { PrismaClient } from '../src/database/prisma/generated/client';
-import { permissions, platformModules, roles } from './kapos-catalog';
+import {
+  obsoletePermissionKeys,
+  permissions,
+  platformModules,
+  roles,
+} from './kapos-catalog';
 
 function createPrismaClient(): PrismaClient {
   const databaseUrl = process.env.DATABASE_URL;
@@ -71,6 +76,10 @@ async function seedModules(prisma: PrismaClient) {
 
 async function seedPermissions(prisma: PrismaClient) {
   for (const permission of permissions) {
+    if (obsoletePermissionKeys.includes(permission.key)) {
+      continue;
+    }
+
     await prisma.permission.upsert({
       where: { key: permission.key },
       update: {
@@ -84,6 +93,10 @@ async function seedPermissions(prisma: PrismaClient) {
       create: permission,
     });
   }
+
+  await prisma.permission.deleteMany({
+    where: { key: { in: obsoletePermissionKeys } },
+  });
 }
 
 async function seedRoles(prisma: PrismaClient) {

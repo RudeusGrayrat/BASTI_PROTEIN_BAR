@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AdminActionButton, PlusIcon } from "../../../components/admin/AdminActionButton";
+import { AdminActionButton, ArrowLeftIcon, PlusIcon } from "../../../components/admin/AdminActionButton";
 import { AdminDataTable, createLocalAdminTableFetch } from "../../../components/admin/AdminDataTable";
 import { AdminMessage, AdminPageHeader, PanelCard, StatCard, Tag } from "../../../components/admin/AdminBlocks";
 import { useAuth } from "../../../context/auth-context";
@@ -33,6 +33,7 @@ export default function CajaMovimientosPage() {
   const [movements, setMovements] = useState<CashMovementSummary[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [viewMode, setViewMode] = useState<"table" | "create">("table");
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     type: "INCOME" as CashMovementType,
@@ -118,6 +119,7 @@ export default function CajaMovimientosPage() {
         paymentMethodId: "",
         note: "",
       });
+      setViewMode("table");
       setReloadKey((current) => current + 1);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "No se pudo registrar el movimiento.");
@@ -138,6 +140,18 @@ export default function CajaMovimientosPage() {
         eyebrow="Caja"
         title="Movimientos"
         description="Registra ingresos, gastos, retiros y ajustes dentro de una caja abierta."
+        action={
+          <div className="flex gap-2">
+            {viewMode === "create" ? (
+              <AdminActionButton tone="ghost" icon={<ArrowLeftIcon />} onClick={() => setViewMode("table")}>
+                Volver a la tabla
+              </AdminActionButton>
+            ) : null}
+            <AdminActionButton onClick={() => setViewMode("create")} icon={<PlusIcon />} tone="primary" active={viewMode === "create"}>
+              Nuevo movimiento
+            </AdminActionButton>
+          </div>
+        }
       />
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Sesiones abiertas" value={String(openSessions.length)} hint="Cajas operativas." tone="dark" />
@@ -145,7 +159,7 @@ export default function CajaMovimientosPage() {
         <StatCard label="Salidas" value={`S/ ${expenseTotal.toFixed(2)}`} hint="Gastos y retiros." />
       </div>
       {error ? <AdminMessage title="No pudimos registrar el movimiento" description={error} tone="warn" /> : null}
-      <div className="grid gap-5 xl:grid-cols-[0.7fr_1.3fr]">
+      {viewMode === "create" ? (
         <PanelCard title="Nuevo movimiento" description="Todo movimiento queda ligado a la sesion abierta.">
           <form className="space-y-4" onSubmit={handleSubmit}>
             <label className="space-y-2">
@@ -174,6 +188,7 @@ export default function CajaMovimientosPage() {
             <div className="flex justify-end"><AdminActionButton type="submit" tone="primary" icon={<PlusIcon />} disabled={!selectedSession}>Registrar movimiento</AdminActionButton></div>
           </form>
         </PanelCard>
+      ) : (
         <PanelCard title="Movimientos de la caja" description="Historial manual de la sesion seleccionada.">
           <AdminDataTable
             fetchData={fetchMovements}
@@ -191,7 +206,7 @@ export default function CajaMovimientosPage() {
             ]}
           />
         </PanelCard>
-      </div>
+      )}
     </section>
   );
 }

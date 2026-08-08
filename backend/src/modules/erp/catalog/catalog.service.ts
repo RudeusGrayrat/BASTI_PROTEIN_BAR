@@ -40,7 +40,10 @@ export class CatalogService {
         organizationId,
         parentId: input.parentId,
         name: input.name,
-        slug: input.slug.toLowerCase(),
+        slug: await this.createUniqueCategorySlug(
+          organizationId,
+          input.slug ?? input.name,
+        ),
         description: input.description,
         color: input.color,
         sortOrder: input.sortOrder ?? 0,
@@ -69,12 +72,21 @@ export class CatalogService {
       );
     }
 
+    const nextSlug =
+      input.slug || input.name
+        ? await this.createUniqueCategorySlug(
+            organizationId,
+            input.slug ?? input.name ?? '',
+            categoryId,
+          )
+        : undefined;
+
     return this.prismaService.productCategory.update({
       where: { id: categoryId, organizationId },
       data: {
         parentId: input.parentId,
         name: input.name,
-        slug: input.slug?.toLowerCase(),
+        slug: nextSlug,
         description: input.description,
         color: input.color,
         sortOrder: input.sortOrder,
@@ -137,6 +149,8 @@ export class CatalogService {
   }
 
   async createProduct(organizationId: string, input: CreateProductDto) {
+    const sku = this.normalizeSku(input.sku);
+
     if (input.categoryId) {
       await this.ensureCategoryBelongsToOrganization(
         organizationId,
@@ -144,12 +158,14 @@ export class CatalogService {
       );
     }
 
+    await this.ensureProductSkuIsAvailable(organizationId, sku);
+
     return this.prismaService.product
       .create({
         data: {
           organizationId,
           categoryId: input.categoryId,
-          sku: input.sku,
+          sku,
           name: input.name,
           description: input.description,
           type: (input.type ?? 'PRODUCT') as ProductType,
@@ -182,6 +198,7 @@ export class CatalogService {
     input: UpdateProductDto,
   ) {
     await this.ensureProductBelongsToOrganization(organizationId, productId);
+    const sku = this.normalizeSku(input.sku);
 
     if (input.categoryId) {
       await this.ensureCategoryBelongsToOrganization(
@@ -190,12 +207,14 @@ export class CatalogService {
       );
     }
 
+    await this.ensureProductSkuIsAvailable(organizationId, sku, productId);
+
     return this.prismaService.product
       .update({
         where: { id: productId, organizationId },
         data: {
           categoryId: input.categoryId,
-          sku: input.sku,
+          sku,
           name: input.name,
           description: input.description,
           type: input.type as ProductType | undefined,
@@ -329,6 +348,72 @@ export class CatalogService {
         'El producto no pertenece a la organizacion activa.',
       );
     }
+  }
+
+  private normalizeSku(sku?: string) {
+    const normalized = sku?.trim();
+    return normalized && normalized.length > 0 ? normalized : undefined;
+  }
+
+  private async ensureProductSkuIsAvailable(
+    organizationId: string,
+    sku?: string,
+    ignoreProductId?: string,
+  ) {
+    if (!sku) return;
+
+    const existingProduct = await this.prismaService.product.findFirst({
+      where: {
+        organizationId,
+        sku,
+        ...(ignoreProductId ? { id: { not: ignoreProductId } } : {}),
+      },
+      select: { id: true, name: true },
+    });
+
+    if (existingProduct) {
+      throw new BadRequestException(
+        `Ya existe un producto con el SKU "${sku}" en esta organizacion.`,
+      );
+    }
+  }
+
+  private async createUniqueCategorySlug(
+    organizationId: string,
+    value: string,
+    ignoreCategoryId?: string,
+  ) {
+    const baseSlug = this.slugify(value);
+    let nextSlug = baseSlug;
+    let suffix = 2;
+
+    while (
+      await this.prismaService.productCategory.findFirst({
+        where: {
+          organizationId,
+          slug: nextSlug,
+          ...(ignoreCategoryId ? { id: { not: ignoreCategoryId } } : {}),
+        },
+        select: { id: true },
+      })
+    ) {
+      nextSlug = `${baseSlug}-${suffix}`;
+      suffix += 1;
+    }
+
+    return nextSlug;
+  }
+
+  private slugify(value: string) {
+    const normalized = value
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    return normalized || 'categoria';
   }
 
   private serializeProduct(product: {

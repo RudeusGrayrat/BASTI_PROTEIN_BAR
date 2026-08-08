@@ -584,11 +584,15 @@ export class PlatformAdminService {
   async createOrganization(input: CreatePlatformOrganizationDto) {
     try {
       return await this.prismaService.$transaction(async (transaction) => {
+        const slug = await this.createUniqueOrganizationSlug(
+          input.slug ?? input.tradeName ?? input.legalName,
+          transaction,
+        );
         const organization = await transaction.organization.create({
           data: {
             legalName: input.legalName,
             tradeName: input.tradeName ?? null,
-            slug: input.slug,
+            slug,
             documentType: input.documentNumber ? 'RUC' : null,
             documentNumber: input.documentNumber ?? null,
             email: input.email ?? null,
@@ -1756,6 +1760,43 @@ export class PlatformAdminService {
     if (!organization) {
       throw new NotFoundException('No se encontro la organizacion.');
     }
+  }
+
+  private async createUniqueOrganizationSlug(
+    value: string,
+    client: Prisma.TransactionClient | PrismaService = this.prismaService,
+    ignoreOrganizationId?: string,
+  ) {
+    const baseSlug = this.slugify(value, 'organizacion');
+    let nextSlug = baseSlug;
+    let suffix = 2;
+
+    while (
+      await client.organization.findFirst({
+        where: {
+          slug: nextSlug,
+          ...(ignoreOrganizationId ? { id: { not: ignoreOrganizationId } } : {}),
+        },
+        select: { id: true },
+      })
+    ) {
+      nextSlug = `${baseSlug}-${suffix}`;
+      suffix += 1;
+    }
+
+    return nextSlug;
+  }
+
+  private slugify(value: string, fallback: string) {
+    const normalized = value
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    return normalized || fallback;
   }
 
   private async resolvePermissionIds(

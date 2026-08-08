@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   AdminActionButton,
+  ArrowLeftIcon,
   PencilIcon,
   PlusIcon,
   SparkIcon,
@@ -278,7 +279,11 @@ export default function ConfigUsuariosPage() {
         description="Invita o vincula usuarios a la organizacion activa, asigna roles y suspende accesos sin borrar historial."
         action={
           <div className="flex gap-2">
-            <AdminActionButton tone="secondary" active={mode === "table"} onClick={() => setMode("table")}>Tabla</AdminActionButton>
+            {mode === "create" ? (
+              <AdminActionButton tone="ghost" icon={<ArrowLeftIcon />} onClick={() => setMode("table")}>
+                Volver a la tabla
+              </AdminActionButton>
+            ) : null}
             <AdminActionButton tone="primary" active={mode === "create"} icon={<PlusIcon />} onClick={() => setMode("create")}>Crear usuario</AdminActionButton>
           </div>
         }
@@ -321,9 +326,9 @@ export default function ConfigUsuariosPage() {
               { key: "status", label: "Estado", render: (row) => <Tag tone={row.status === "ACTIVE" ? "accent" : row.status === "SUSPENDED" ? "warn" : "soft"}>{row.status}</Tag> },
             ]}
             actions={[
-              { label: "Editar", permission: "settings.users.assign_roles", icon: <PencilIcon />, onClick: openEditor },
-              { label: "Suspender", permission: "settings.users.assign_roles", tone: "warn", icon: <TrashIcon />, visible: (row) => row.status !== "SUSPENDED", onClick: suspendMember },
-              { label: "Reactivar", permission: "settings.users.assign_roles", tone: "accent", icon: <SparkIcon />, visible: (row) => row.status === "SUSPENDED", onClick: reactivateMember },
+              { label: "Editar", permission: "settings.users.update", icon: <PencilIcon />, onClick: openEditor },
+              { label: "Suspender", permission: "settings.users.update", tone: "warn", icon: <TrashIcon />, visible: (row) => row.status !== "SUSPENDED", onClick: suspendMember },
+              { label: "Reactivar", permission: "settings.users.activate", tone: "accent", icon: <SparkIcon />, visible: (row) => row.status === "SUSPENDED", onClick: reactivateMember },
             ]}
           />
         </PanelCard>

@@ -362,7 +362,7 @@ export default function PlatformPermissionsPage() {
                 }
               />
               <p className="text-xs leading-5 text-[#74805f]">
-                Usa una llave tecnica tipo contexto.recurso.accion. Ejemplos: platform.users.read, organization.roles.manage.
+                Usa una llave tecnica tipo contexto.recurso.accion. Ejemplos: platform.users.read, settings.roles.update.
               </p>
             </label>
             <label className="space-y-2">
@@ -550,13 +550,7 @@ export default function PlatformPermissionsPage() {
                 },
                 {
                   label: "Editar",
-                  permission: "platform.permissions.manage",
-                  onClick: (row) => openPermissionEditor(row),
-                },
-                {
-                  label: "Aprobar",
-                  permission: "platform.permissions.manage",
-                  tone: "accent",
+                  permission: "platform.permissions.update",
                   onClick: (row) => openPermissionEditor(row),
                 },
               ]}

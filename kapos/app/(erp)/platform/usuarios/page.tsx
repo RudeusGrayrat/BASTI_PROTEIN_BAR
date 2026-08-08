@@ -16,6 +16,10 @@ import {
   Tag,
 } from "../../../components/admin/AdminBlocks";
 import { AdminOverlayPanel } from "../../../components/admin/AdminOverlayPanel";
+import {
+  AdminPermissionMatrix,
+  buildPermissionMatrixRows,
+} from "../../../components/admin/AdminPermissionMatrix";
 import { useAuth } from "../../../context/auth-context";
 import { isApiError } from "../../../lib/api";
 import {
@@ -49,78 +53,6 @@ type PermissionOverrideDraft = {
   allowPermissionKeys: string[];
   denyPermissionKeys: string[];
 };
-
-type PermissionMatrixRow = {
-  key: string;
-  moduleName: string;
-  moduleKey: string;
-  submoduleName: string;
-  submoduleKey: string;
-  permissions: PlatformPermissionSummary[];
-};
-
-function buildPermissionMatrixRows(
-  modules: PlatformModuleSummary[],
-  permissionList: PlatformPermissionSummary[],
-) {
-  const modulesByKey = new Map(modules.map((moduleItem) => [moduleItem.key, moduleItem]));
-  const rowsByKey = new Map<string, PermissionMatrixRow>();
-
-  for (const permission of permissionList) {
-    const moduleKey = permission.moduleKey ?? "system";
-    const moduleItem = modulesByKey.get(moduleKey);
-    const submoduleKey = permission.submoduleKey ?? "general";
-    const submoduleItem = moduleItem?.submodules.find(
-      (submodule) => submodule.key === submoduleKey,
-    );
-    const rowKey = `${moduleKey}:${submoduleKey}`;
-
-    if (!rowsByKey.has(rowKey)) {
-      rowsByKey.set(rowKey, {
-        key: rowKey,
-        moduleName: moduleItem?.name ?? moduleKey,
-        moduleKey,
-        submoduleName: submoduleItem?.name ?? submoduleKey,
-        submoduleKey,
-        permissions: [],
-      });
-    }
-
-    rowsByKey.get(rowKey)?.permissions.push(permission);
-  }
-
-  return Array.from(rowsByKey.values())
-    .map((row) => ({
-      ...row,
-      permissions: row.permissions.sort((first, second) =>
-        first.name.localeCompare(second.name),
-      ),
-    }))
-    .sort((first, second) => {
-      const firstModule = modulesByKey.get(first.moduleKey);
-      const secondModule = modulesByKey.get(second.moduleKey);
-      const moduleOrder =
-        (firstModule?.sortOrder ?? 999) - (secondModule?.sortOrder ?? 999);
-
-      if (moduleOrder !== 0) {
-        return moduleOrder;
-      }
-
-      const firstSubmodule = firstModule?.submodules.find(
-        (submodule) => submodule.key === first.submoduleKey,
-      );
-      const secondSubmodule = secondModule?.submodules.find(
-        (submodule) => submodule.key === second.submoduleKey,
-      );
-      const submoduleOrder =
-        (firstSubmodule?.sortOrder ?? 999) -
-        (secondSubmodule?.sortOrder ?? 999);
-
-      return submoduleOrder !== 0
-        ? submoduleOrder
-        : first.submoduleName.localeCompare(second.submoduleName);
-    });
-}
 
 export default function PlatformUsersPage() {
   const {
@@ -623,84 +555,31 @@ export default function PlatformUsersPage() {
       (row) => row.moduleKey === "system" || enabledModuleKeys.has(row.moduleKey),
     );
 
-    if (membershipPermissionRows.length === 0) {
-      return (
-        <AdminMessage
-          title="Sin permisos disponibles para esta organizacion"
-          description="Primero habilita modulos para esta organizacion desde Superadmin > Organizaciones. Luego podras delegar sus permisos aqui."
-        />
-      );
-    }
-
     return (
-      <div className="mt-4 overflow-hidden rounded-[22px] border border-[#e4ead5] bg-white">
-        <div className="grid grid-cols-[0.75fr_0.85fr_1.8fr] border-b border-[#e8eedb] bg-[#f8fbef] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#7c8c51]">
-          <span>Modulo</span>
-          <span>Submodulo</span>
-          <span>Permisos</span>
-        </div>
-        <div className="max-h-80 overflow-y-auto">
-          {membershipPermissionRows.map((row) => (
-            <div
-              key={`${membership.id}-${row.key}`}
-              className="grid grid-cols-[0.75fr_0.85fr_1.8fr] gap-3 border-b border-[#edf1e4] px-4 py-3 last:border-b-0"
-            >
-              <div>
-                <p className="text-sm font-semibold text-[#1b2111]">
-                  {row.moduleName}
-                </p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-[#8b9572]">
-                  {row.moduleKey}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-[#344222]">
-                  {row.submoduleName}
-                </p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-[#8b9572]">
-                  {row.submoduleKey}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {row.permissions.map((permission) => {
-                  const active = effectiveMembershipPermissions.includes(
-                    permission.key,
-                  );
-
-                  return (
-                    <AdminActionButton
-                      key={`${membership.id}-${permission.id}`}
-                      type="button"
-                      tone="secondary"
-                      active={active}
-                      size="sm"
-                      onClick={() =>
-                        setEditForm((current) =>
-                          current
-                            ? {
-                                ...current,
-                                membershipOverrides: {
-                                  ...current.membershipOverrides,
-                                  [membership.id]: toggleOverride(
-                                    membership.rolePermissionKeys,
-                                    membershipOverrides,
-                                    permission.key,
-                                  ),
-                                },
-                              }
-                            : current,
-                        )
-                      }
-                    >
-                      {permission.name}
-                    </AdminActionButton>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <AdminPermissionMatrix
+        rows={membershipPermissionRows}
+        selectedPermissionKeys={effectiveMembershipPermissions}
+        emptyTitle="Sin permisos disponibles para esta organizacion"
+        emptyDescription="Primero habilita modulos para esta organizacion desde Superadmin > Organizaciones. Luego podras delegar sus permisos aqui."
+        className="h-full"
+        onToggle={(permissionKey) =>
+          setEditForm((current) =>
+            current
+              ? {
+                  ...current,
+                  membershipOverrides: {
+                    ...current.membershipOverrides,
+                    [membership.id]: toggleOverride(
+                      membership.rolePermissionKeys,
+                      membershipOverrides,
+                      permissionKey,
+                    ),
+                  },
+                }
+              : current,
+          )
+        }
+      />
     );
   }
 
@@ -810,8 +689,8 @@ export default function PlatformUsersPage() {
               ]}
               actions={[
                 { label: "Ver detalle", icon: <EyeIcon />, onClick: (user) => openUserDetail(user) },
-                { label: "Editar", permission: "platform.users.manage", onClick: (user) => openUserEditor(user) },
-                { label: "Asignar", permission: "platform.memberships.manage", tone: "accent", onClick: (user) => openMembershipAssigner(user) },
+                { label: "Editar", permission: "platform.users.update", onClick: (user) => openUserEditor(user) },
+                { label: "Asignar", permission: "platform.memberships.update", tone: "accent", onClick: (user) => openMembershipAssigner(user) },
               ]}
             />
           )}
@@ -854,7 +733,7 @@ export default function PlatformUsersPage() {
               </AdminActionButton>
             ) : (
               <>
-                {platformContext?.permissionKeys.includes("platform.users.manage") ? (
+                {platformContext?.permissionKeys.includes("platform.users.update") ? (
                   <AdminActionButton
                     tone="primary"
                     onClick={() => selectedUser && openUserEditor(selectedUser)}
@@ -862,7 +741,7 @@ export default function PlatformUsersPage() {
                     Editar usuario
                   </AdminActionButton>
                 ) : null}
-                {platformContext?.permissionKeys.includes("platform.memberships.manage") ? (
+                {platformContext?.permissionKeys.includes("platform.memberships.update") ? (
                   <AdminActionButton
                     tone="accent"
                     onClick={() => selectedUser && openMembershipAssigner(selectedUser)}
@@ -945,7 +824,7 @@ export default function PlatformUsersPage() {
                     );
 
                     return (
-                      <article key={membership.id} className="rounded-[24px] border border-[#edf1e4] bg-[#fbfcf8] p-4">
+                      <article key={membership.id} className="rounded-[24px] border border-[#edf1e4] min-h-[800px] bg-[#fbfcf8] p-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <p className="font-semibold text-[#1b2111]">

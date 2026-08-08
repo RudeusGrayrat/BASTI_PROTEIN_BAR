@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AdminActionButton, PlusIcon } from "../../../components/admin/AdminActionButton";
+import { AdminActionButton, ArrowLeftIcon, PlusIcon } from "../../../components/admin/AdminActionButton";
 import { AdminDataTable } from "../../../components/admin/AdminDataTable";
 import { AdminMessage, AdminPageHeader, PanelCard, StatCard, Tag } from "../../../components/admin/AdminBlocks";
 import { useAuth } from "../../../context/auth-context";
@@ -24,6 +24,7 @@ export default function CajaCierrePage() {
   const [closedSessions, setClosedSessions] = useState<CashSessionSummary[]>([]);
   const [selectedSessionId, setSelectedSessionId] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [viewMode, setViewMode] = useState<"table" | "close">("table");
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ countedAmount: "0", closingNote: "" });
 
@@ -92,6 +93,7 @@ export default function CajaCierrePage() {
       });
       setSelectedSessionId("");
       setForm({ countedAmount: "0", closingNote: "" });
+      setViewMode("table");
       setReloadKey((current) => current + 1);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "No se pudo cerrar la caja.");
@@ -109,6 +111,18 @@ export default function CajaCierrePage() {
         eyebrow="Caja"
         title="Cierre"
         description="Cuenta el efectivo real, compara contra lo esperado y cierra la sesion de caja."
+        action={
+          <div className="flex gap-2">
+            {viewMode === "close" ? (
+              <AdminActionButton tone="ghost" icon={<ArrowLeftIcon />} onClick={() => setViewMode("table")}>
+                Volver a la tabla
+              </AdminActionButton>
+            ) : null}
+            <AdminActionButton onClick={() => setViewMode("close")} icon={<PlusIcon />} tone="primary" active={viewMode === "close"}>
+              Cerrar caja
+            </AdminActionButton>
+          </div>
+        }
       />
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Abiertas" value={String(openSessions.length)} hint="Pendientes de cierre." tone="dark" />
@@ -116,7 +130,7 @@ export default function CajaCierrePage() {
         <StatCard label="Diferencia actual" value={`S/ ${differenceAmount.toFixed(2)}`} hint="Conteo menos esperado." />
       </div>
       {error ? <AdminMessage title="No pudimos cerrar la caja" description={error} tone="warn" /> : null}
-      <div className="grid gap-5 xl:grid-cols-[0.7fr_1.3fr]">
+      {viewMode === "close" ? (
         <PanelCard title="Cerrar caja" description="Este cierre bloquea nuevos movimientos en la sesion.">
           <form className="space-y-4" onSubmit={handleSubmit}>
             <label className="space-y-2">
@@ -141,6 +155,7 @@ export default function CajaCierrePage() {
             <div className="flex justify-end"><AdminActionButton type="submit" tone="primary" icon={<PlusIcon />} disabled={!selectedSession}>Cerrar caja</AdminActionButton></div>
           </form>
         </PanelCard>
+      ) : (
         <PanelCard title="Historial de cierres" description="Sesiones cerradas con esperado, contado y diferencia.">
           <AdminDataTable
             fetchData={fetchClosedSessions}
@@ -159,7 +174,7 @@ export default function CajaCierrePage() {
             ]}
           />
         </PanelCard>
-      </div>
+      )}
     </section>
   );
 }

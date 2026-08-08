@@ -1,20 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AdminActionButton, PencilIcon, PlusIcon } from "../../../components/admin/AdminActionButton";
+import { AdminActionButton, ArrowLeftIcon, PencilIcon, PlusIcon } from "../../../components/admin/AdminActionButton";
 import { AdminDataTable, createLocalAdminTableFetch } from "../../../components/admin/AdminDataTable";
 import { AdminMessage, AdminPageHeader, PanelCard, StatCard, Tag } from "../../../components/admin/AdminBlocks";
 import { useAuth } from "../../../context/auth-context";
+import { useToast } from "../../../context/toast-context";
 import { getBranches, getProducts, getStock, upsertStock } from "../../../lib/erp-api";
 import type { BranchSummary, ProductStockSummary, ProductSummary } from "../../../types/erp";
 
 export default function CatalogoStockPage() {
   const { accessToken, activeOrganizationId, effectivePermissionKeys, refreshSession } = useAuth();
+  const toast = useToast();
   const [stock, setStock] = useState<ProductStockSummary[]>([]);
   const [products, setProducts] = useState<ProductSummary[]>([]);
   const [branches, setBranches] = useState<BranchSummary[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"table" | "create">("table");
   const [form, setForm] = useState({ productId: "", branchId: "", quantity: "0", minQuantity: "0" });
 
   async function resolveToken() {
@@ -58,8 +61,12 @@ export default function CatalogoStockPage() {
       });
       setForm({ productId: "", branchId: "", quantity: "0", minQuantity: "0" });
       setReloadKey((current) => current + 1);
+      setViewMode("table");
+      toast.showSuccess("El stock fue actualizado correctamente.", "Stock actualizado");
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "No se pudo actualizar el stock.");
+      const message = submitError instanceof Error ? submitError.message : "No se pudo actualizar el stock.";
+      setError(message);
+      toast.showError(message, "No pudimos actualizar stock");
     }
   }
 
@@ -70,18 +77,35 @@ export default function CatalogoStockPage() {
       quantity: String(item.quantity),
       minQuantity: String(item.minQuantity),
     });
+    setViewMode("create");
   }
 
   return (
     <section className="space-y-8">
-      <AdminPageHeader eyebrow="Catalogo" title="Stock" description="Existencias iniciales por sucursal. Luego agregaremos kardex y movimientos auditables." />
+      <AdminPageHeader
+        eyebrow="Catalogo"
+        title="Stock"
+        description="Existencias iniciales por sucursal. Luego agregaremos kardex y movimientos auditables."
+        action={
+          <div className="flex gap-3">
+            {viewMode === "create" ? (
+              <AdminActionButton onClick={() => setViewMode("table")} icon={<ArrowLeftIcon />} tone="ghost">
+                Volver a la tabla
+              </AdminActionButton>
+            ) : null}
+            <AdminActionButton onClick={() => setViewMode("create")} icon={<PlusIcon />} tone="primary" active={viewMode === "create"}>
+              Actualizar stock
+            </AdminActionButton>
+          </div>
+        }
+      />
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard label="Items con stock" value={String(stock.length)} hint="Producto por sucursal." tone="dark" />
         <StatCard label="Bajo stock" value={String(stock.filter((item) => item.status === "LOW").length)} hint="Alertas iniciales." tone="accent" />
         <StatCard label="Sin stock" value={String(stock.filter((item) => item.status === "OUT").length)} hint="No disponibles." />
       </div>
       {error ? <AdminMessage title="No pudimos actualizar stock" description={error} tone="warn" /> : null}
-      <div className="grid gap-5 xl:grid-cols-[0.7fr_1.3fr]">
+      {viewMode === "create" ? (
         <PanelCard title="Actualizar stock" description="Stock inicial manual para dejar listo el POS.">
           <form className="space-y-4" onSubmit={handleSubmit}>
             <label className="space-y-2"><span className="text-sm font-semibold text-[#21300f]">Producto</span><select className="w-full rounded-[20px] border border-[#e2e8d0] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#a9cf24]" value={form.productId} onChange={(event) => setForm((current) => ({ ...current, productId: event.target.value }))} required><option value="">Selecciona producto</option>{products.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}</select></label>
@@ -91,6 +115,7 @@ export default function CatalogoStockPage() {
             <div className="flex justify-end"><AdminActionButton type="submit" tone="primary" icon={<PlusIcon />}>Guardar stock</AdminActionButton></div>
           </form>
         </PanelCard>
+      ) : (
         <PanelCard title="Tabla de stock" description="Estado actual por producto y sucursal.">
           <AdminDataTable
             fetchData={fetchStock}
@@ -108,11 +133,11 @@ export default function CatalogoStockPage() {
               { key: "status", label: "Estado", render: (row) => <Tag tone={row.status === "OK" ? "accent" : row.status === "LOW" ? "warn" : "dark"}>{row.status}</Tag> },
             ]}
             actions={[
-              { label: "Editar stock", permission: "catalog.adjustments.manage", icon: <PencilIcon />, onClick: loadStockIntoForm },
+              { label: "Editar stock", permission: "catalog.stock.update", icon: <PencilIcon />, onClick: loadStockIntoForm },
             ]}
           />
         </PanelCard>
-      </div>
+      )}
     </section>
   );
 }
