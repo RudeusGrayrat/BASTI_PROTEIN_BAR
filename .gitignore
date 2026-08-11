@@ -67,3 +67,9 @@ desktop.ini
 
 # Repos separados locales
 separated-repos/
+
+# Proyectos movidos fuera del repo Basti
+backend/
+kapos/
+kapos-mobile/
+mobile/
