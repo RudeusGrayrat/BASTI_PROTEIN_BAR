@@ -70,6 +70,12 @@ export function toPublicAuthSessionResponse<TUser>(
   return publicResponse;
 }
 
+export function toMobileAuthSessionResponse<TUser>(
+  sessionResponse: AuthSessionResponse<TUser>,
+): AuthSessionResponse<TUser> {
+  return sessionResponse;
+}
+
 export function getRefreshCookieName(): string {
   return REFRESH_COOKIE_NAME;
 }

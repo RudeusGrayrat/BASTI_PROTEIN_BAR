@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConsumerAuthController } from './consumer-auth.controller';
 import { ErpAuthController } from './erp-auth.controller';
+import { MobileAuthController } from './mobile-auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 type JwtDuration = `${number}${'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'y'}`;
@@ -31,7 +32,12 @@ type JwtDuration = `${number}${'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'y'}`;
       }),
     }),
   ],
-  controllers: [AuthController, ConsumerAuthController, ErpAuthController],
+  controllers: [
+    AuthController,
+    ConsumerAuthController,
+    ErpAuthController,
+    MobileAuthController,
+  ],
   providers: [AuthService, JwtStrategy],
   exports: [AuthService],
 })

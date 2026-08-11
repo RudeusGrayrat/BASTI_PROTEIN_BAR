@@ -64,3 +64,6 @@ desktop.ini
 **/android/app/debug/
 **/android/app/profile/
 **/android/app/release/
+
+# Repos separados locales
+separated-repos/

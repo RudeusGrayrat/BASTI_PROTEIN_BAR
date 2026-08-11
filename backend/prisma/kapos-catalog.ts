@@ -645,6 +645,15 @@ export const permissions: PermissionSeed[] = [
     audience: 'ORGANIZATION',
   },
   {
+    key: 'sales.pos.create',
+    name: 'Crear ventas POS',
+    description: 'Permite registrar ventas pagadas desde POS web o mobile.',
+    moduleKey: 'sales',
+    submoduleKey: 'pos',
+    scope: 'BRANCH',
+    audience: 'ORGANIZATION',
+  },
+  {
     key: 'cash.openings.read',
     name: 'Ver aperturas de caja',
     description: 'Permite consultar aperturas de caja.',
@@ -825,6 +834,15 @@ export const obsoletePermissionKeys = [
 ];
 
 permissions.push(
+  {
+    key: 'sales.pos.cancel',
+    name: 'Anular ventas POS',
+    description: 'Permite anular ventas y reversar caja, stock, puntos y documento.',
+    moduleKey: 'sales',
+    submoduleKey: 'pos',
+    scope: 'BRANCH',
+    audience: 'ORGANIZATION',
+  },
   {
     key: 'platform.organizations.update',
     name: 'Actualizar organizaciones',
@@ -1361,6 +1379,8 @@ export const roles: RoleSeed[] = [
       'sales.orders.read',
       'sales.orders.create',
       'sales.pos.read',
+      'sales.pos.create',
+      'sales.pos.cancel',
       'cash.openings.read',
       'cash.openings.create',
       'cash.openings.update',
@@ -1422,6 +1442,8 @@ export const roles: RoleSeed[] = [
       'sales.orders.read',
       'sales.orders.create',
       'sales.pos.read',
+      'sales.pos.create',
+      'sales.pos.cancel',
       'cash.openings.read',
       'cash.movements.read',
       'cash.closings.read',
@@ -1447,6 +1469,7 @@ export const roles: RoleSeed[] = [
       'sales.orders.read',
       'sales.orders.create',
       'sales.pos.read',
+      'sales.pos.create',
       'cash.openings.read',
       'cash.openings.create',
       'cash.movements.read',
