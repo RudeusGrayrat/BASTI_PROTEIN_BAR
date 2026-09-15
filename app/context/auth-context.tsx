@@ -38,6 +38,7 @@ type AuthContextValue = {
   refreshSession: (options?: { silent?: boolean }) => Promise<AuthResponse | null>;
   reloadCurrentUser: () => Promise<AuthUser>;
   updateProfile: (input: UpdateCurrentUserInput) => Promise<AuthUser>;
+  runAuthenticatedRequest: <T>(operation: (token: string) => Promise<T>) => Promise<T>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -213,6 +214,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       refreshSession,
       reloadCurrentUser,
       updateProfile,
+      runAuthenticatedRequest,
     }),
     [
       accessToken,
@@ -223,6 +225,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       register,
       reloadCurrentUser,
       updateProfile,
+      runAuthenticatedRequest,
       user,
     ],
   );

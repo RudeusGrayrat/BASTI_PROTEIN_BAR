@@ -16,7 +16,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.replace("/login");
+      router.replace("/login?next=/profile");
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -70,11 +70,11 @@ export default function ProfilePage() {
 
       <section className="mx-auto grid max-w-6xl gap-8 px-5 py-10 sm:px-8 lg:grid-cols-[0.9fr_1.1fr]">
         <aside className="rounded-3xl bg-[#314620] p-6 text-white shadow-2xl shadow-[#314620]/20 sm:p-8">
-          <p className="text-sm font-semibold text-[#d6c79d]">Perfil Consumer</p>
+          <p className="text-sm font-semibold text-[#d6c79d]">Mi perfil</p>
           <h1 className="mt-2 font-serif text-5xl">Completa tu informacion</h1>
           <p className="mt-4 text-white/75">
-            Este perfil alimenta la experiencia real de tu cuenta en BASTI
-            Consumer Web.
+            Actualiza tus datos para disfrutar de tu cuenta BASTI
+            y sus beneficios.
           </p>
 
           <div className="mt-8 space-y-4">
@@ -209,10 +209,10 @@ export default function ProfilePage() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/cuenta")}
                 className="rounded-full border border-[#d8ccb6] px-6 py-3 font-semibold text-[#364026] transition hover:bg-white"
               >
-                Volver al inicio
+                Volver a mi cuenta
               </button>
             </div>
           </form>

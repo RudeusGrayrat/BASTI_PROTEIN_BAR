@@ -1,11 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { AuthSwitchLink } from "../features/commerce/AuthSwitchLink";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { Header } from "../components/Header";
-import { ProductImage } from "../components/ProductImage";
+import { AuthLayout } from "../features/auth/AuthLayout";
+import { AuthField } from "../features/auth/AuthField";
+import { ArrowRightIcon } from "../components/icons";
 import { navigateAfterAuth, useAuth } from "../context/auth-context";
+import { authDestination } from "../features/commerce/cart-domain";
 import { isApiError } from "../lib/api";
 
 export default function RegisterPage() {
@@ -16,7 +18,9 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      navigateAfterAuth(() => router.replace("/"));
+      navigateAfterAuth(() =>
+        router.replace(authDestination(window.location.search)),
+      );
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -34,13 +38,13 @@ export default function RegisterPage() {
     const acceptedTerms = form.get("acceptedTerms") === "on";
 
     if (password !== confirmPassword) {
-      setErrorMessage("La confirmacion de contrasena debe coincidir.");
+      setErrorMessage("Las contraseñas deben coincidir.");
       setIsSubmitting(false);
       return;
     }
 
     if (!acceptedTerms) {
-      setErrorMessage("Debes aceptar los terminos para crear tu cuenta.");
+      setErrorMessage("Debes aceptar los términos para crear tu cuenta.");
       setIsSubmitting(false);
       return;
     }
@@ -53,7 +57,9 @@ export default function RegisterPage() {
         lastName: lastName || undefined,
       });
 
-      navigateAfterAuth(() => router.replace("/"));
+      navigateAfterAuth(() =>
+        router.replace(authDestination(window.location.search)),
+      );
     } catch (error) {
       if (isApiError(error)) {
         setErrorMessage(
@@ -67,143 +73,106 @@ export default function RegisterPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-[#fbf7ed] text-[#385126]">
-        Preparando el registro...
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen bg-[#fbf7ed] text-[#1d2815]">
-      <Header />
-      <section className="mx-auto grid min-h-[calc(100vh-80px)] max-w-6xl gap-8 px-5 py-10 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-        <div className="overflow-hidden rounded-[28px] border border-[#e0d4c1] bg-[#efe3d0] shadow-2xl shadow-[#61451f]/10 max-lg:order-2">
-          <ProductImage variant="waffle" alt="Waffle proteico clasico" large />
-        </div>
-
-        <div className="rounded-3xl border border-[#e1d7c7] bg-white/70 p-6 shadow-xl shadow-[#61451f]/10 sm:p-10">
-          <p className="text-sm font-bold uppercase tracking-[0.24em] text-[#6d744f]">
-            Cuenta BASTI
-          </p>
-          <h1 className="mt-3 font-serif text-5xl text-[#11170d]">
-            Crea tu cuenta
-          </h1>
-          <p className="mt-4 text-[#676356]">
-            Empieza con tu correo y tu contrasena. El resto del perfil lo podras
-            completar despues.
-          </p>
-
-          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="text-sm font-semibold text-[#3b412f]">
-                  Nombre
-                </span>
-                <input
+    <AuthLayout
+      register
+      title="Crea tu cuenta"
+      description="Tu próxima pausa favorita empieza aquí."
+    >
+      {isLoading ? (
+        <p role="status" className="py-12 text-center text-[#556235]">
+          Recuperando tu sesión…
+        </p>
+      ) : (
+        <>
+          <form
+            onSubmit={handleSubmit}
+            className="auth-form"
+            aria-busy={isSubmitting}
+          >
+            <fieldset
+              disabled={isSubmitting}
+              className="space-y-5 disabled:opacity-70"
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <AuthField
+                  label="Nombre"
                   name="firstName"
-                  maxLength={100}
                   autoComplete="given-name"
-                  placeholder="Opcional"
-                  className="mt-2 h-12 w-full rounded-2xl border border-[#d8ccb6] bg-[#fffaf0] px-4 text-[#1d2815] placeholder:text-[#aaa08e]"
-                />
-              </label>
-              <label className="block">
-                <span className="text-sm font-semibold text-[#3b412f]">
-                  Apellido
-                </span>
-                <input
-                  name="lastName"
                   maxLength={100}
-                  autoComplete="family-name"
-                  placeholder="Opcional"
-                  className="mt-2 h-12 w-full rounded-2xl border border-[#d8ccb6] bg-[#fffaf0] px-4 text-[#1d2815] placeholder:text-[#aaa08e]"
+                  placeholder="Tu nombre (opcional)"
                 />
-              </label>
-            </div>
-
-            <label className="block">
-              <span className="text-sm font-semibold text-[#3b412f]">Correo</span>
-              <input
+                <AuthField
+                  label="Apellido"
+                  name="lastName"
+                  autoComplete="family-name"
+                  maxLength={100}
+                  placeholder="Tu apellido (opcional)"
+                />
+              </div>
+              <AuthField
+                label="Correo electrónico"
                 name="email"
                 type="email"
                 required
                 maxLength={255}
                 autoComplete="email"
-                placeholder="cliente@basti.pe"
-                className="mt-2 h-12 w-full rounded-2xl border border-[#d8ccb6] bg-[#fffaf0] px-4 text-[#1d2815] placeholder:text-[#aaa08e]"
+                placeholder="tu@correo.com"
               />
-            </label>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="block">
-                <span className="text-sm font-semibold text-[#3b412f]">
-                  Contrasena
-                </span>
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  minLength={8}
-                  maxLength={100}
-                  autoComplete="new-password"
-                  placeholder="Minimo 8 caracteres"
-                  className="mt-2 h-12 w-full rounded-2xl border border-[#d8ccb6] bg-[#fffaf0] px-4 text-[#1d2815] placeholder:text-[#aaa08e]"
-                />
-              </label>
-              <label className="block">
-                <span className="text-sm font-semibold text-[#3b412f]">
-                  Confirmar contrasena
-                </span>
-                <input
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  minLength={8}
-                  maxLength={100}
-                  autoComplete="new-password"
-                  placeholder="Repite tu contrasena"
-                  className="mt-2 h-12 w-full rounded-2xl border border-[#d8ccb6] bg-[#fffaf0] px-4 text-[#1d2815] placeholder:text-[#aaa08e]"
-                />
-              </label>
-            </div>
-
-            <label className="flex items-start gap-3 rounded-2xl border border-[#e4dac8] bg-[#fffaf0] px-4 py-3">
-              <input
-                name="acceptedTerms"
-                type="checkbox"
-                className="mt-1 h-4 w-4 rounded border-[#bdb19d]"
+              <AuthField
+                label="Contraseña"
+                name="password"
+                password
+                required
+                minLength={8}
+                maxLength={100}
+                autoComplete="new-password"
+                placeholder="Mínimo 8 caracteres"
               />
-              <span className="text-sm text-[#5e5b50]">
-                Acepto los terminos del Consumer Web de BASTI para crear mi
-                cuenta.
-              </span>
-            </label>
-
-            {errorMessage ? (
-              <div className="rounded-2xl border border-[#d39b93] bg-[#fff2ef] px-4 py-3 text-sm font-medium text-[#8c3b31]">
-                {errorMessage}
-              </div>
-            ) : null}
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="h-12 w-full rounded-full bg-[#385126] font-bold text-white shadow-lg shadow-[#385126]/20 transition hover:bg-[#26391a] disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isSubmitting ? "Creando cuenta..." : "Crear cuenta"}
-            </button>
+              <AuthField
+                label="Confirmar contraseña"
+                name="confirmPassword"
+                password
+                required
+                minLength={8}
+                maxLength={100}
+                autoComplete="new-password"
+                placeholder="Repite tu contraseña"
+              />
+              <label className="flex items-start gap-3 text-sm leading-6 text-[#666458]">
+                <input
+                  name="acceptedTerms"
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 shrink-0 accent-[#556235]"
+                />
+                <span>Acepto los términos de Basti para crear mi cuenta.</span>
+              </label>
+              {errorMessage && (
+                <p
+                  role="alert"
+                  className="rounded-xl border border-[#d39b93] bg-[#fff2ef] px-4 py-3 text-sm text-[#8c3b31]"
+                >
+                  {errorMessage}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="auth-submit"
+              >
+                {isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
+                <ArrowRightIcon className="h-5 w-5" />
+              </button>
+            </fieldset>
           </form>
-
-          <p className="mt-6 text-center text-sm text-[#676356]">
-            Ya tienes cuenta?{" "}
-            <Link href="/login" className="font-bold text-[#385126]">
-              Inicia sesion
-            </Link>
-          </p>
-        </div>
-      </section>
-    </main>
+          <div className="auth-divider">
+            <span>¿Ya tienes cuenta?</span>
+          </div>
+          <AuthSwitchLink to="/login" className="auth-switch">
+            Iniciar sesión
+          </AuthSwitchLink>
+        </>
+      )}
+    </AuthLayout>
   );
 }

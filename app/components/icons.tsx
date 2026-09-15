@@ -66,6 +66,14 @@ export const BagIcon = createIcon(
   </>,
 );
 
+export const ShoppingCartIcon = createIcon(
+  <>
+    <path d="M2 3h3l3 12h11l3-9H6" />
+    <circle cx="9" cy="20" r="1" />
+    <circle cx="19" cy="20" r="1" />
+  </>,
+);
+
 export const GiftIcon = createIcon(
   <>
     <path d="M20 12v7H4v-7" />

@@ -2,26 +2,21 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useMemo } from "react";
-import {
-  experienceHighlights,
-  featurePillars,
-  products,
-  rewardPreview,
-} from "./data";
+import { Header } from "./Header";
+import { featurePillars } from "./data";
 import {
   ArrowRightIcon,
-  BagIcon,
+  UserIcon,
+  GiftIcon,
   BarbellIcon,
   BoltIcon,
   HeartIcon,
   LeafIcon,
   MenuGridIcon,
   SproutIcon,
-  UserIcon,
 } from "./icons";
-import { ProductImage } from "./ProductImage";
-import { getUserSummaryName, useAuth } from "../context/auth-context";
+import { ProductPhoto } from "../features/commerce/ProductPhoto";
+import { useStorefront } from "../features/commerce/StorefrontProvider";
 
 const pillarIcons = {
   leaf: LeafIcon,
@@ -31,83 +26,11 @@ const pillarIcons = {
 } as const;
 
 export function BastiLanding() {
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const accountLabel = useMemo(() => getUserSummaryName(user), [user]);
+  const { catalog, loading, error, retry } = useStorefront();
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.92),transparent_28%),linear-gradient(180deg,#f6f0e3_0%,#f2eadb_100%)] text-[#171710]">
-      <header className="sticky top-0 z-30 border-b border-[#dfd4c3] bg-[#f8f4ec]/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1380px] items-center justify-between gap-6 px-5 py-5 sm:px-8">
-          <Link href="/" className="flex items-center gap-3">
-            <div>
-              <p className="font-serif text-4xl leading-none tracking-[0.14em] text-[#171710]">
-                BASTI
-              </p>
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#4e5d33]">
-                Protein Bar
-              </p>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-8 text-[15px] font-medium text-[#27291f] lg:flex">
-            {["Inicio", "Menu", "Beneficios", "Puntos", "Nosotros", "Contacto"].map(
-              (item, index) => (
-                <Link
-                  key={item}
-                  href={index === 0 ? "/" : `/#${item.toLowerCase()}`}
-                  className={`pb-2 transition hover:text-[#4e5d33] ${index === 0
-                    ? "border-b-2 border-[#4e5d33] text-[#171710]"
-                    : "border-b-2 border-transparent"
-                    }`}
-                >
-                  {item}
-                </Link>
-              ),
-            )}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            {isLoading ? (
-              <span className="rounded-full border border-[#cfc4b2] px-5 py-3 text-sm font-semibold text-[#464636]">
-                Cargando...
-              </span>
-            ) : isAuthenticated ? (
-              <>
-                <Link
-                  href="/"
-                  className="hidden rounded-full border border-[#cfc4b2] bg-white/70 px-5 py-3 text-sm font-semibold text-[#27291f] transition hover:bg-white sm:inline-flex"
-                >
-                  {accountLabel}
-                </Link>
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#556235] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#556235]/20 transition hover:bg-[#45502b]"
-                >
-                  <BagIcon className="h-4 w-4" />
-                  Ir a mi cuenta
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-2 rounded-full border border-[#cfc4b2] bg-white/70 px-5 py-3 text-sm font-semibold text-[#27291f] transition hover:bg-white"
-                >
-                  <UserIcon className="h-4 w-4" />
-                  Iniciar sesion
-                </Link>
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#556235] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-[#556235]/20 transition hover:bg-[#45502b]"
-                >
-                  <BagIcon className="h-4 w-4" />
-                  Pedir ahora
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <section className="relative min-h-[680px] max-h-[80vh] overflow-hidden">
         <div className="absolute inset-y-0 right-0 w-[60vw] max-w-[1500px] lg:w-[90vw]">
@@ -130,9 +53,10 @@ export function BastiLanding() {
             </div>
             <h1
               style={{
-                fontFamily: "BJCree"
+                fontFamily: "BJCree",
               }}
-              className="font-semibold text-4xl leading-none text-[#171710] sm:text-5xl lg:text-7xl">
+              className="font-semibold text-4xl leading-none text-[#171710] sm:text-5xl lg:text-7xl"
+            >
               Waffles proteicos
               <span className="block text-[#B68A5B]">sin azúcar</span>
               añadida
@@ -144,7 +68,7 @@ export function BastiLanding() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href={isAuthenticated ? "/" : "/register"}
+                href="/menu"
                 className="inline-flex items-center gap-2 rounded-full bg-[#556235] px-6 py-4 text-sm font-bold text-white shadow-lg shadow-[#556235]/20 transition hover:bg-[#45502b]"
               >
                 Pedir ahora
@@ -159,26 +83,14 @@ export function BastiLanding() {
               </Link>
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center gap-5">
-              <div className="flex -space-x-3">
-                {["A", "M", "C", "L"].map((letter, index) => (
-                  <div
-                    key={`${letter}-${index}`}
-                    className="grid h-12 w-12 place-items-center rounded-full border-2 border-[#f6f0e3] bg-gradient-to-br from-[#e6d7c0] to-[#b49872] text-sm font-bold text-[#251c13]"
-                    style={{ zIndex: 4 - index }}
-                  >
-                    {letter}
-                  </div>
-                ))}
+            <div className="mt-8 flex items-center gap-4 text-[#44433c]">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#d8ccb6] bg-white/60">
+                <HeartIcon className="h-5 w-5 text-[#556235]" />
               </div>
               <div>
-                <div className="flex items-center gap-1 text-[#556235]">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <span key={index}>*</span>
-                  ))}
-                </div>
-                <p className="mt-1 text-base text-[#44433c]">
-                  +2,500 clientes felices
+                <p className="font-semibold">Tu pausa favorita empieza aquí.</p>
+                <p className="mt-1 text-sm">
+                  Descubre el sabor de Basti, a tu ritmo.
                 </p>
               </div>
             </div>
@@ -186,9 +98,8 @@ export function BastiLanding() {
 
           <div className="relative  min-h-[560px] lg:min-h-[680px]">
             <div className="absolute -right-30 top-[5%] z-10 grid h-36 w-36 place-items-center rounded-full bg-[#f6ebd3]/95 text-center shadow-lg shadow-[#a88f64]/15 p-5">
-              <p className="font-serif text-5xl leading-none text-[#363C20]">25<span className="text-[#B68A5B]">
-                g
-              </span>
+              <p className="font-serif text-5xl leading-none text-[#363C20]">
+                25<span className="text-[#B68A5B]">g</span>
               </p>
               <p className="mt-2 text-md font-black uppercase tracking-[0.10em] text-[#232016]">
                 Proteína
@@ -240,83 +151,87 @@ export function BastiLanding() {
         id="menu"
         className="mx-auto grid max-w-[1380px] gap-12 px-5  mt-5 sm:px-8 "
       >
-        <div className="flex flex-col justify-between 
-          ">
+        <div
+          className="flex flex-col justify-between 
+          "
+        >
           <div className=" w-full mb-4 flex justify-between items-center gap-5 flex-wrap lg:flex-nowrap">
-            <div >
+            <div>
               <h2 className=" font-serif text-4xl my-2 leading-tight text-[#1b1a13]">
                 Productos favoritos
               </h2>
               <div className="mb-2 h-1 w-16 rounded-full bg-[#5f6942]" />
             </div>
             <Link
-              href={isAuthenticated ? "/" : "/register"}
+              href="/menu"
               className="mb-2 inline-flex w-fit items-center gap-2 rounded-full bg-[#556235] px-6 py-4 text-sm font-bold text-white shadow-lg shadow-[#556235]/20 transition hover:bg-[#45502b]"
             >
               Ver todo el menu
               <ArrowRightIcon className="h-4 w-4" />
             </Link>
           </div>
+          {loading && (
+            <p role="status" className="py-8 text-[#556235]">
+              Cargando productos…
+            </p>
+          )}
+          {error && (
+            <div role="alert" className="py-8">
+              <p>{error}</p>
+              <button className="basti-button mt-3" onClick={retry}>
+                Reintentar
+              </button>
+            </div>
+          )}
+          {!loading && !error && !catalog?.products.length && (
+            <p className="py-8">La carta estará disponible próximamente.</p>
+          )}
           <div className="grid gap-5 lg:grid-cols-[repeat(3,minmax(0,1fr))_0.95fr]">
-            {products.map((product) => (
+            {catalog?.products.slice(0, 4).map((product) => (
               <article
-                key={product.name}
-                className="overflow-hidden rounded-2xl border border-[#e2d6c4] bg-white/70 shadow-[0_18px_40px_rgba(90,72,39,0.07)]"
+                key={product.id}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-[#e2d6c4] bg-white/70 shadow-[0_18px_40px_rgba(90,72,39,0.07)] transition duration-300 hover:shadow-xl motion-safe:hover:-translate-y-1"
               >
-                <div className="relative">
+                <div className="relative shrink-0">
                   <div className="overflow-hidden bg-[#f2e8d8]">
-                    <ProductImage variant={product.image} alt={product.name} />
+                    <ProductPhoto src={product.imageUrl} name={product.name} />
                   </div>
                   <span className="absolute left-4 top-4 rounded-full bg-[#f7edd6]/95 px-3 py-2 text-xs font-black uppercase tracking-[0.14em] text-[#534328] shadow-sm">
-                    {product.protein}
+                    {product.category}
                   </span>
                 </div>
-                <div className="p-5">
+                <div className="flex flex-1 flex-col p-5">
                   <h3 className="text-[1.6rem] font-semibold leading-tight text-[#191911]">
-                    {product.name.replace("Proteico", "").replace("Protein", "").trim()}
+                    {product.name}
                   </h3>
                   <p className="mt-3 text-[15px] leading-7 text-[#59584f]">
                     {product.description}
                   </p>
-                  <div className="mt-6 flex items-center justify-between">
+                  <div className="mt-auto flex items-center justify-between gap-3 pt-6">
                     <span className="text-sm font-semibold text-[#6a624d]">
                       Favorito BASTI
                     </span>
-                    <HeartIcon className="h-5 w-5 text-[#8c8574]" />
+                    <Link
+                      href="/menu"
+                      aria-label={`Elegir ${product.name}`}
+                      className="rounded-full border border-[#d8ccb6] shrink-0 px-4 py-2 text-sm font-semibold text-[#556235] transition duration-200 hover:bg-white hover:shadow-sm motion-safe:active:scale-95"
+                    >
+                      Elegir →
+                    </Link>
                   </div>
                 </div>
               </article>
             ))}
-
           </div>
         </div>
-        <aside className="overflow-hidden rounded-3xl bg-[linear-gradient(180deg,rgba(30,30,24,0.94),rgba(38,39,28,0.92))] p-10 text-[#f7f0df] shadow-[0_24px_50px_rgba(23,21,16,0.18)]">
-          <div className="mb-8">
-            <p className="font-serif text-5xl leading-tight">
-              Mas que un lugar,
-              <span className=" text-[#d6ddaa]"> una experiencia.</span>
-            </p>
-          </div>
-          <div className="space-x-8 flex">
-            {experienceHighlights.map((highlight) => (
-              <div
-                key={highlight.title}
-                className="border-r border-white/10 pr-6 last:border-r-0 last:pr-0"
-              >
-                <p className="text-lg font-semibold">{highlight.title}</p>
-                <p className="mt-2 text-sm leading-6 text-[#f5efdf]/70">
-                  {highlight.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </aside>
-
       </section>
 
-      <section id="beneficios" className=" mx-auto max-w-[1380px] px-5 p-16 sm:px-8">
+      <section
+        id="beneficios"
+        className=" mx-auto max-w-[1380px] px-5 p-16 sm:px-8"
+      >
         <div className=" gap-8 flex flex-col rounded-3xl border border-[#eadfce] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(247,239,223,0.88))] p-8 shadow-[0_28px_60px_rgba(90,72,39,0.08)] lg:grid-cols-[0.75fr_1.25fr_auto] lg:items-center">
-          <div className="flex items-center gap-5 ">
+          <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
             <div className="grid h-28 w-28 shrink-0 place-items-center rounded-[2rem] bg-[#f3e8d2] shadow-inner">
               <div className="text-center">
                 <p className="font-serif text-3xl tracking-[0.22em]">BASTI</p>
@@ -327,35 +242,52 @@ export function BastiLanding() {
             </div>
             <div>
               <h2 className="font-serif text-5xl leading-tight text-[#1b1a13]">
-                Pide, acumula y disfruta
-                <span className="block text-[#556235]">de beneficios exclusivos.</span>
+                Tu próxima pausa
+                <span className="block text-[#556235]">también suma.</span>
               </h2>
             </div>
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
-            {rewardPreview.map((item) => (
-              <div key={item} className="flex items-start gap-3">
+            {[
+              {
+                Icon: UserIcon,
+                title: "Tu cuenta, tu espacio",
+                text: "Crea tu cuenta para consultar tus compras y puntos.",
+              },
+              {
+                Icon: HeartIcon,
+                title: "Cada visita cuenta",
+                text: "Descubre cómo sumar puntos con tus compras en Basti.",
+              },
+              {
+                Icon: GiftIcon,
+                title: "Todo sobre tus puntos",
+                text: "Conoce el programa y consulta las opciones disponibles para ti.",
+              },
+            ].map(({ Icon, title, text }) => (
+              <div key={title} className="flex items-start gap-3">
                 <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[#f2ecd8] text-[#556235]">
-                  <StarIconProxy />
+                  <Icon className="h-5 w-5" />
                 </div>
-                <p className="text-[15px] leading-7 text-[#4d4b41]">{item}</p>
+                <div>
+                  <h3 className="font-semibold text-[#314620]">{title}</h3>
+                  <p className="mt-2 text-[15px] leading-7 text-[#4d4b41]">
+                    {text}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
 
           <Link
-            href={isAuthenticated ? "/" : "/register"}
+            href="/puntos"
             className="inline-flex items-center justify-center rounded-full bg-[#556235] px-7 py-4 text-sm font-bold text-white shadow-lg shadow-[#556235]/20 transition hover:bg-[#45502b]"
           >
-            Conoce mas
+            Descubre Puntos Basti
           </Link>
         </div>
       </section>
     </main>
   );
-}
-
-function StarIconProxy() {
-  return <span className="text-lg">*</span>;
 }
