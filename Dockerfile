@@ -28,6 +28,6 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/next.config.* ./
 
-EXPOSE 4000
+EXPOSE 3000
 
-CMD ["pnpm", "start", "--hostname", "0.0.0.0", "--port", "4000"]
+CMD ["pnpm", "start", "--hostname", "0.0.0.0", "--port", "3000"]
