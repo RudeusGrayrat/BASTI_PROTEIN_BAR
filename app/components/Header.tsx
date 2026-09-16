@@ -17,6 +17,29 @@ export function Header() {
   const router = useRouter();
   const { isAuthenticated, isLoading, logout, user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [mobilePath, setMobilePath] = useState<string | null>(null);
+  const mobileOpen = mobilePath === pathname;
+  const headerRef = useRef<HTMLElement>(null);
+  const menuTrigger = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!mobileOpen) return;
+    function dismiss(event: PointerEvent) {
+      if (!headerRef.current?.contains(event.target as Node))
+        setMobilePath(null);
+    }
+    function escape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobilePath(null);
+        menuTrigger.current?.focus();
+      }
+    }
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [mobileOpen]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const container = useRef<HTMLDivElement>(null);
@@ -60,9 +83,45 @@ export function Header() {
       ? pathname
       : "/cuenta";
   return (
-    <header className="sticky top-0 z-40 border-b border-[#dcd5c5]/70 bg-[#fbf7ed]/95 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1380px] flex-wrap items-center justify-between gap-x-6 px-5 sm:px-8">
-        <Link href="/" aria-label="Basti, inicio" className="py-4 leading-none">
+    <header
+      ref={headerRef}
+      className="site-header sticky top-0 z-40 border-b border-[#dcd5c5]/70 bg-[#fbf7ed]/95 backdrop-blur-xl"
+    >
+      <div className="site-header-inner mx-auto flex max-w-[1380px] flex-wrap items-center justify-between gap-x-6 px-5 sm:px-8">
+        <button
+          ref={menuTrigger}
+          type="button"
+          className="mobile-menu-trigger"
+          aria-label={mobileOpen ? "Cerrar navegación" : "Abrir navegación"}
+          aria-expanded={mobileOpen}
+          aria-controls="primary-navigation"
+          onClick={() => {
+            setMobilePath(mobileOpen ? null : pathname);
+            setOpen(false);
+          }}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="23"
+            height="23"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            {mobileOpen ? (
+              <path d="m5 5 14 14M5 19 19 5" />
+            ) : (
+              <path d="M3 6h18M3 12h18M3 18h18" />
+            )}
+          </svg>
+        </button>
+        <Link
+          href="/"
+          aria-label="Basti, inicio"
+          className="site-brand py-4 leading-none"
+        >
           <span className="block font-serif text-3xl tracking-[0.22em] text-[#1d2815]">
             BASTI
           </span>
@@ -71,13 +130,16 @@ export function Header() {
           </span>
         </Link>
         <nav
+          id="primary-navigation"
+          data-open={mobileOpen}
           aria-label="Navegación principal"
-          className="order-3 flex w-full items-center justify-between gap-3 overflow-x-auto border-t border-[#ded5c4]/50 lg:order-none lg:w-auto lg:gap-8 lg:border-0"
+          className="site-navigation order-3 flex w-full items-center justify-between gap-3 overflow-x-auto border-t border-[#ded5c4]/50 lg:order-none lg:w-auto lg:gap-8 lg:border-0"
         >
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
+              onClick={() => setMobilePath(null)}
               aria-current={pathname === link.href ? "page" : undefined}
               className={`shrink-0 py-3 text-sm font-medium transition hover:text-[#556235] lg:py-7 ${pathname === link.href ? "text-[#314620]" : "text-[#636650]"}`}
             >
@@ -93,7 +155,7 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="header-actions flex items-center gap-2">
           <CartLink />
           <div
             className="relative"
@@ -114,7 +176,10 @@ export function Header() {
               aria-label="Mi cuenta"
               aria-expanded={open}
               aria-controls="account-navigation"
-              onClick={() => setOpen((value) => !value)}
+              onClick={() => {
+                setOpen((value) => !value);
+                setMobilePath(null);
+              }}
               className={`grid h-11 w-11 place-items-center rounded-full border transition focus-visible:outline-2 focus-visible:outline-offset-4 ${open ? "border-[#556235] bg-[#556235] text-white" : "border-[#dcd5c5] bg-white/60 text-[#45502b] hover:bg-[#eee9dc]"}`}
             >
               <UserIcon className="h-5 w-5" />

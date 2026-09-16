@@ -33,7 +33,8 @@ export default function ProfilePage() {
         firstName: String(form.get("firstName") ?? ""),
         lastName: String(form.get("lastName") ?? ""),
         phone: String(form.get("phone") ?? ""),
-        documentType: String(form.get("documentType") ?? "") as DocumentType | "",
+        documentType: String(form.get("documentType") ?? "") as
+          DocumentType | "",
         documentNumber: String(form.get("documentNumber") ?? ""),
       });
       setFeedback("Tu perfil se actualizo correctamente.");
@@ -73,13 +74,19 @@ export default function ProfilePage() {
           <p className="text-sm font-semibold text-[#d6c79d]">Mi perfil</p>
           <h1 className="mt-2 font-serif text-5xl">Completa tu informacion</h1>
           <p className="mt-4 text-white/75">
-            Actualiza tus datos para disfrutar de tu cuenta BASTI
-            y sus beneficios.
+            Actualiza tus datos para disfrutar de tu cuenta BASTI y sus
+            beneficios.
           </p>
 
           <div className="mt-8 space-y-4">
-            <ProfileAsideRow label="Correo" value={user.email ?? "Sin correo"} />
-            <ProfileAsideRow label="Estado actual" value={getProfileStatus(user)} />
+            <ProfileAsideRow
+              label="Correo"
+              value={user.email ?? "Sin correo"}
+            />
+            <ProfileAsideRow
+              label="Estado actual"
+              value={getProfileStatus(user)}
+            />
             <ProfileAsideRow
               label="Documento"
               value={
@@ -108,7 +115,9 @@ export default function ProfilePage() {
             className="mt-8 space-y-4"
           >
             <label className="block">
-              <span className="text-sm font-semibold text-[#3b412f]">Correo</span>
+              <span className="text-sm font-semibold text-[#3b412f]">
+                Correo
+              </span>
               <input
                 value={user.email ?? ""}
                 readOnly
@@ -228,7 +237,7 @@ function ProfileAsideRow({ label, value }: { label: string; value: string }) {
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">
         {label}
       </p>
-      <p className="mt-2 font-semibold">{value}</p>
+      <p className="mt-2 break-words font-semibold">{value}</p>
     </div>
   );
 }

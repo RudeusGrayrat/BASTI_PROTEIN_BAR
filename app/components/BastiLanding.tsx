@@ -32,8 +32,8 @@ export function BastiLanding() {
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.92),transparent_28%),linear-gradient(180deg,#f6f0e3_0%,#f2eadb_100%)] text-[#171710]">
       <Header />
 
-      <section className="relative min-h-[680px] max-h-[80vh] overflow-hidden">
-        <div className="absolute inset-y-0 right-0 w-[60vw] max-w-[1500px] lg:w-[90vw]">
+      <section className="landing-hero relative min-h-[680px] max-h-[80vh] overflow-hidden">
+        <div className="landing-hero-image absolute inset-y-0 right-0 w-[60vw] max-w-[1500px] lg:w-[90vw]">
           <Image
             src={"/images/basti/hero-waffles.png"}
             alt="Waffles proteícos BASTI con platano y cacao"
@@ -43,10 +43,10 @@ export function BastiLanding() {
             className="object-cover object-right"
           />
         </div>
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(246,240,227,0.96)_0%,rgba(249,240,229,1)_30%,rgba(246,240,227,0.34)_45%,rgba(246,240,227,0.06)_60%)]" />
+        <div className="landing-hero-shade absolute inset-0 bg-[linear-gradient(90deg,rgba(246,240,227,0.96)_0%,rgba(249,240,229,1)_30%,rgba(246,240,227,0.34)_45%,rgba(246,240,227,0.06)_60%)]" />
 
-        <div className="relative z-10  mx-auto max-h-[680px] grid max-w-[1380px] gap-10 px-5  sm:px-8 lg:grid-cols-[0.84fr_1.16fr] lg:items-center lg:gap-0">
-          <div className="relative py-6 z-10 min-h-[560px] lg:min-h-[680px] lg:py-8">
+        <div className="landing-hero-grid relative z-10  mx-auto max-h-[680px] grid max-w-[1380px] gap-10 px-5  sm:px-8 lg:grid-cols-[0.84fr_1.16fr] lg:items-center lg:gap-0">
+          <div className="landing-hero-copy relative py-6 z-10 min-h-[560px] lg:min-h-[680px] lg:py-8">
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/78 px-4 py-2 text-sm font-bold text-[#393e2d] shadow-sm backdrop-blur">
               <LeafIcon className="h-4 w-4" />
               100% saludable
@@ -66,7 +66,7 @@ export function BastiLanding() {
               cuidar de ti sin sacrificar el sabor.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="landing-hero-actions mt-8 flex flex-wrap gap-3">
               <Link
                 href="/menu"
                 className="inline-flex items-center gap-2 rounded-full bg-[#556235] px-6 py-4 text-sm font-bold text-white shadow-lg shadow-[#556235]/20 transition hover:bg-[#45502b]"
@@ -83,7 +83,7 @@ export function BastiLanding() {
               </Link>
             </div>
 
-            <div className="mt-8 flex items-center gap-4 text-[#44433c]">
+            <div className="landing-hero-note mt-8 flex items-center gap-4 text-[#44433c]">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#d8ccb6] bg-white/60">
                 <HeartIcon className="h-5 w-5 text-[#556235]" />
               </div>
@@ -96,8 +96,8 @@ export function BastiLanding() {
             </div>
           </div>
 
-          <div className="relative  min-h-[560px] lg:min-h-[680px]">
-            <div className="absolute -right-30 top-[5%] z-10 grid h-36 w-36 place-items-center rounded-full bg-[#f6ebd3]/95 text-center shadow-lg shadow-[#a88f64]/15 p-5">
+          <div className="landing-hero-decor relative min-h-[560px] lg:min-h-[680px]">
+            <div className="landing-protein absolute right-0 top-[5%] z-10 grid h-36 w-36 place-items-center rounded-full bg-[#f6ebd3]/95 text-center shadow-lg shadow-[#a88f64]/15 p-5">
               <p className="font-serif text-5xl leading-none text-[#363C20]">
                 25<span className="text-[#B68A5B]">g</span>
               </p>
@@ -107,7 +107,7 @@ export function BastiLanding() {
               <p className=" text-sm text-[#4e493b]">por porción</p>
             </div>
 
-            <div className="absolute bottom-[15%] flex gap-4 -right-40 z-20 max-w-[400px] rounded-[1.65rem] border border-[#75654f]/35 bg-[#2b281f]/82 p-5 text-[#f5efdf] shadow-2xl shadow-[#15120c]/25 backdrop-blur-md">
+            <div className="landing-ingredients absolute bottom-[15%] flex gap-4 right-0 z-20 max-w-[400px] rounded-[1.65rem] border border-[#75654f]/35 bg-[#2b281f]/82 p-5 text-[#f5efdf] shadow-2xl shadow-[#15120c]/25 backdrop-blur-md">
               <div className="grid h-16! w-16! place-items-center rounded-full! border border-[#7c8256]/55 bg-[#1f1d16] text-[#d6e39e]">
                 <LeafIcon className="h-9 w-9 " />
               </div>
@@ -123,7 +123,7 @@ export function BastiLanding() {
       </section>
 
       <section className="relative z-10 mx-auto  -mt-8 max-w-[1380px] px-5 pb-4 sm:px-8 lg:-mt-15">
-        <div className="grid gap-px overflow-hidden rounded-2xl bg-[#3f412f] p-px shadow-2xl shadow-[#1e1c16]/18 lg:grid-cols-4">
+        <div className="landing-pillars grid gap-px overflow-hidden rounded-2xl bg-[#3f412f] p-px shadow-2xl shadow-[#1e1c16]/18 lg:grid-cols-4">
           {featurePillars.map((pillar) => {
             const Icon = pillarIcons[pillar.icon];
 
@@ -186,7 +186,7 @@ export function BastiLanding() {
           {!loading && !error && !catalog?.products.length && (
             <p className="py-8">La carta estará disponible próximamente.</p>
           )}
-          <div className="grid gap-5 lg:grid-cols-[repeat(3,minmax(0,1fr))_0.95fr]">
+          <div className="landing-favorites grid gap-5 lg:grid-cols-[repeat(3,minmax(0,1fr))_0.95fr]">
             {catalog?.products.slice(0, 4).map((product) => (
               <article
                 key={product.id}
@@ -228,7 +228,7 @@ export function BastiLanding() {
 
       <section
         id="beneficios"
-        className=" mx-auto max-w-[1380px] px-5 p-16 sm:px-8"
+        className="landing-rewards mx-auto max-w-[1380px] px-5 p-16 sm:px-8"
       >
         <div className=" gap-8 flex flex-col rounded-3xl border border-[#eadfce] bg-[linear-gradient(180deg,rgba(255,255,255,0.75),rgba(247,239,223,0.88))] p-8 shadow-[0_28px_60px_rgba(90,72,39,0.08)] lg:grid-cols-[0.75fr_1.25fr_auto] lg:items-center">
           <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
